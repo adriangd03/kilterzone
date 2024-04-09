@@ -8,6 +8,10 @@
             <div class="card">
                 <div class="card-header text-center">Inici de sessió</div>
 
+                @error('error', 'login')
+                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                @enderror
+
                 <div class="card-body">
                     <form method="POST" action="{{ route('login') }}">
                         @csrf

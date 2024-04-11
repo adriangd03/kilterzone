@@ -1,7 +1,14 @@
 @extends('layouts.master')
 @section('title', 'Login')
+@section('styles')
+@endsection
+@section('scripts')
+<script src="https://www.google.com/recaptcha/api.js"></script>
+@endsection
 
 @section('content')
+
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6 ">
@@ -45,9 +52,17 @@
                             @enderror
                         </div>
 
+                        <!-- input i div per el recaptcha -->
+                        @if (session('loginIntents') >= 3)
+                        <input type="hidden" name="g-token" id="recaptchaToken">
+                        <div class="g-recaptcha " data-sitekey="6LeoIrgpAAAAAECV9u6e49Mb9Og9yzg5g0XcIDM7" data-callback='onSubmit' data-action='submit'>Submit</div>
+                        @error('g-token','login')
+                        <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
+                        @enderror
+                        @endif
 
 
-                        <div class="mb-3">
+                        <div class="mb-3 mt-2">
                             <button type="submit" class="btn btn-primary">
                                 Inici de sessió
                             </button>
@@ -70,5 +85,12 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    function onSubmit(token) {
+        document.getElementById("recaptchaToken").value = token;
+    }
+</script>
 
 @endsection

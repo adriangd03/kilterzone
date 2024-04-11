@@ -27,6 +27,7 @@ class UserController extends Controller
                 [
                     'email_username' => 'required',
                     'password' => 'required',
+                    'g-token' => session('loginIntents') >= 3 ? 'required' : '',
                 ],
                 [
                     'email_username.required' => 'El camp adreça de correu o nom d\'usuari és obligatori',
@@ -52,6 +53,10 @@ class UserController extends Controller
                 $request->session()->regenerate();
                 return redirect()->intended('/');
             }
+
+            // Si falla la autorització, sumem un intent de login
+            if (!session('loginIntents')) session(['loginIntents' => 1]);
+            session(['loginIntents' => session('loginIntents') + 1]);
 
             // Comprovem si el nom de usuari o correu electrònic existeixen
             if (isset($credentials['email'])) {

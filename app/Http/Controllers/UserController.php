@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Password;
 
 
 class UserController extends Controller
@@ -27,6 +28,7 @@ class UserController extends Controller
                 [
                     'email_username' => 'required',
                     'password' => 'required',
+                    // Si s'han fet més de 3 intents de login, es requerirà el token de recaptcha
                     'g-token' => session('loginIntents') >= 3 ? 'required' : '',
                 ],
                 [
@@ -110,7 +112,7 @@ class UserController extends Controller
             Auth::login($user);
             return redirect()->route('home')->with('success', 'S\'ha iniciat sessió correctament');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'inici de sessió amb Google, tornar a provar o prova-ho més tard' . $e);
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'inici de sessió amb Google, tornar a provar o prova-ho més tard' );
         }
     }
 
@@ -142,8 +144,10 @@ class UserController extends Controller
                     'email.max' => 'El camp correu electrònic ha de tenir un màxim de 255 caràcters',
                     'email.unique' => 'Aquest correu electrònic ja està registrat',
                     'password.required' => 'El camp contrasenya és obligatori',
-                    'password.string' => 'El camp contrasenya ha de ser una cadena de caràcters',
-                    'password.min' => 'El camp contrasenya ha de tenir un mínim de 8 caràcters',
+                    'password.string' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.min' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.max' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.regex' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
                 ]
             );
             User::create([
@@ -155,7 +159,7 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->validator->getMessageBag(), 'registre')->withInput();
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => "Hi ha ocurregut un problema en el procés de registre, tornar a provar o prova-ho més tard" . $e,], 'registre');
+            return back()->withErrors(['error' => "Hi ha ocurregut un problema en el procés de registre, tornar a provar o prova-ho més tard" ,], 'registre');
         }
     }
 
@@ -176,5 +180,131 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de tancar sessió, tornar a provar o prova-ho més tard');
         }
+    }
+
+    /**
+     * Funció per a recuperar la contrasenya
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina de login o a la pàgina anterior
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     * @throws \Exception Si hi ha algun error en el procés de recuperar la contrasenya
+     */
+    public function recuperar(Request $request)
+    {
+        try {
+            $request->validate(
+                [
+                    'email' => 'required|email|max:255|exists:users,email',
+                ],
+                [
+                    'email.required' => 'El camp correu electrònic és obligatori',
+                    'email.email' => 'El camp correu electrònic ha de ser una adreça de correu vàlida',
+                    'email.max' => 'El camp correu electrònic ha de tenir un màxim de 255 caràcters',
+                    'email.exists' => 'Aquest correu electrònic no està registrat',
+                ]
+            );
+            $user = User::where('email', $request->email)->first();
+            
+            if (!$user->password) {
+                return redirect()->back()->with('error', 'Aquest usuari no té permisos per a restablir la contrasenya');
+            }
+
+            $token = Password::createToken($user);
+
+            $user->sendPasswordResetNotification($token);
+
+            return redirect()->route('login')->with('success', 'S\'ha enviat un correu electrònic per a restablir la contrasenya');
+
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'recuperar')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de recuperar la contrasenya, tornar a provar o prova-ho més tard');
+        }
+    }
+
+
+        /**
+     * Mostra el formulari per restaurar la contrasenya
+     * @param Request $request dades de l'usuari
+     * @return redirecció a la pàgina de restaurar contrassenya si no hi ha cap error, altrament redirigir a la pàgina de login amb error
+     * @throws \Exception si no es pot mostrar el formulari de restaurar contrasenya
+     */
+    public function restaurarForm(Request $request)
+    {
+        try {
+            // Mostrar el formulari per restaurar la contrasenya i passar el token
+            return view('restaurar', ['token' => $request->token]);
+        } catch (\Exception $e) {
+            //Retornem la resposta error si ha ocorregut algun error
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de restaurar la contrasenya, tornar a provar o prova-ho més tard');
+        }
+    }
+
+    /**
+     * Funció per a restablir la contrasenya
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina de login o a la pàgina anterior
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     * @throws \Exception Si hi ha algun error en el procés de restablir la contrasenya
+     */
+    public function restaurarContrasenya(Request $request){
+        try {
+            $request->validate(
+                [
+                    'token' => 'required',
+                    'password' => 'required|min:6|max:25|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/|confirmed',
+                ],
+                [
+                    'token.required' => 'El token de restabliment de contrasenya és obligatori',
+                    'password.required' => 'El camp contrasenya és obligatori',
+                    'password.string' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.min' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.max' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.regex' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.confirmed' => 'Les contrasenyes no coincideixen',
+                ]
+            );
+            // Crear un array amb les dades del usuari
+            $credentials = $request->only(
+                'email',
+                'password',
+                'password_confirmation',
+                'token'
+            );
+
+            // Restaurar la contrasenya de l'usuari
+            $status = Password::reset($credentials, function ($user, $password) {
+                $user->password = $password;
+                $user->save();
+            });
+
+            $user = User::where('email', $request->email)->first();
+
+            // Comprovem si s'ha restaurat la contrasenya correctament
+            if ($status == Password::PASSWORD_RESET) {
+                // Si ha anat bé, redirigim l'usuari a la pàgina de login
+                return redirect()->route('login')->with('success', 'S\'ha restablert la contrasenya correctament')->withInput(['email_username' => $user->email]);
+            } else {
+
+                // Comprovem si l'error és per un email incorrecte
+                if ($status == Password::INVALID_USER) {
+                    return back()->withInput()->withErrors(['error' => ['Aquest email no és correcte']], 'restaurar');
+                }
+
+                // Comprovem si l'error és per un token incorrecte
+                if ($status == Password::INVALID_TOKEN) {
+                    return back()->withInput()->withErrors(['error' => ['El token no és vàlid, reinicia el procés de recuperació de contrasenya']], 'restaurar');
+                }
+
+            }
+
+            return back()->withInput()->withErrors(['error' => ['Hi ha hagut un error al restablir la contrasenya']], 'restaurar');
+
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'restaurarContrasenya')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de restablir la contrasenya, tornar a provar o prova-ho més tard');
+        }
+
     }
 }

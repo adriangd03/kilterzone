@@ -80,6 +80,12 @@
                         </div>
                     </form>
 
+
+                </div>
+
+                <div class="card-footer text-center align-top">
+                    <p class="mb-0">Has oblidat la teva contrasenya? </p><button class="btn text-primary text-decoration-underline align-text-center text-center " data-bs-toggle="modal" data-bs-target="#modalRecuperar">Recupera-la</button>
+                    <p class="mb-0">No tens un compte? <a href="{{ route('registre') }}">Registra't</a></p>
                 </div>
             </div>
         </div>
@@ -93,4 +99,58 @@
     }
 </script>
 
+
+
+<!-- Modal per recuperar contrasenya -->
+<div class="modal fade" id="modalRecuperar" tabindex="-1" aria-labelledby="modalRecuperarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRecuperarLabel">Recuperar contrasenya</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body
+                            ">
+                <form method="POST" action="{{ route('recuperar') }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        @error('email','recuperar')
+                        <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
+                        @enderror
+
+                        @error('error','recuperar')
+                        <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="d-grid gap
+                                    -2">
+                        <button type="submit" class="btn btn-primary">Recuperar contrasenya</button>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal per recuperar la contrasenya si el usuari ha posat malament el email o hi ha hagut un error -->
+
+@error('email','recuperar')
+<script>
+    var myModal = new bootstrap.Modal(document.getElementById('modalRecuperar'), {
+        keyboard: false
+    });
+    myModal.show();
+</script>
+@enderror
+@error('error','recuperar')
+<script>
+    var myModal = new bootstrap.Modal(document.getElementById('modalRecuperar'), {
+        keyboard: false
+    });
+    myModal.show();
+</script>
+@enderror
 @endsection

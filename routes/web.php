@@ -36,3 +36,9 @@ Route::post('registre', [UserController::class, 'registre'])->name('registre')->
 
 Route::post('logout', [UserController::class, 'logout'])->name('logout')->middleware('auth');
 
+Route::post('recuperar', [UserController::class, 'recuperar'])->name('recuperar')->middleware('guest');
+
+Route::get('restaurarContrasenya/{token}', [UserController::class, 'restaurarForm'])->name('restaurarContrasenya')->middleware('guest');
+
+Route::post('restaurarContrasenya', [UserController::class, 'restaurarContrasenya'])->name('restaurarContrasenya.post')->middleware('guest');
+

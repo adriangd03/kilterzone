@@ -22,9 +22,8 @@
                             <input id="email" type="email" class="form-control @error('email', 'registre') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
 
                             @error('email', 'registre')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
+                            <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
+
                             @enderror
                         </div>
 
@@ -34,9 +33,8 @@
                             <input id="username" type="text" class="form-control @error('username', 'registre') is-invalid @enderror" name="username" value="{{ old('username') }}" required autocomplete="username" autofocus>
 
                             @error('username', 'registre')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
+                            <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
+
                             @enderror
                         </div>
 
@@ -46,9 +44,8 @@
                             <input id="password" type="password" class="form-control @error('password', 'registre') is-invalid @enderror" name="password" required autocomplete="current-password">
 
                             @error('password', 'registre')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
+                            <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
+
                             @enderror
                         </div>
 

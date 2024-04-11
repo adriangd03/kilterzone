@@ -12,38 +12,56 @@
                 <div class="alert alert-danger mt-2">{{ $message }}</div>
                 @enderror
 
+                @if (session('error'))
+                <div class="alert alert-danger mt-2">{{ session('error') }}</div>
+
+                @endif
+
+                @if (session('success'))
+                <div class="alert alert-success mt-2">{{ session('success') }}</div>
+                @endif
+
                 <div class="card-body">
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">adreça de correu</label>
+                            <label for="email_username" class="form-label">Adreça de correu o nom de usuari</label>
 
-                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                            <input id="email_username" type="email_username" class="form-control @error('email_username','login') is-invalid @enderror" name="email_username" value="{{ old('email_username') }}" required autofocus>
 
-                            @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
+                            @error('email_username','login')
+                            <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
                             <label for="password" class="form-label">Contrasenya</label>
 
-                            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                            <input id="password" type="password" class="form-control @error('password','login') is-invalid @enderror" name="password" required autocomplete="current-password">
 
-                            @error('password')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
+                            @error('password','login')
+                            <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
                             @enderror
                         </div>
+
+
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">
                                 Inici de sessió
                             </button>
+                        </div>
+
+                        <div class="mt-3 d-grid gap-2">
+                            <a href="/login-google" class="btn btn-danger">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="24" width="100%">
+                                    <path fill="#ffffff" d="M386 400c45-42 65-112 53-179H260v74h102c-4 24-18 44-38 57z"></path>
+                                    <path fill="#ffffff" d="M90 341a192 192 0 0 0 296 59l-62-48c-53 35-141 22-171-60z"></path>
+                                    <path fill="#ffffff" d="M153 292c-8-25-8-48 0-73l-63-49c-23 46-30 111 0 171z"></path>
+                                    <path fill="#ffffff" d="M153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55z"></path>
+                                </svg> Registra't amb Google
+                            </a>
                         </div>
                     </form>
 

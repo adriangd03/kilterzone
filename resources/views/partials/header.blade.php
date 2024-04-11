@@ -13,11 +13,9 @@
                     </li>
                     @auth
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{route('articles-propis')}}">Articles propis</a>
+                        <a class="nav-link active" aria-current="page" href="{{route('home')}}">Rutes propies</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{route('galeria')}}">Galeria</a>
-                    </li>
+                  
 
                     @endauth
 
@@ -36,7 +34,7 @@
                         </a>
                         <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in">
 
-                            <a class="dropdown-item" href="{{route('configuracio')}}">
+                            <a class="dropdown-item" href="{{route('home')}}">
                                 <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Perfil
                             </a>
                             <a class="dropdown-item" href="#">

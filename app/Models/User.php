@@ -44,4 +44,24 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Crear un nom d'usuari unic a partir de un nom
+     * @param string $name Nom de l'usuari
+     * @return string Nom d'usuari únic
+     */
+    public static function createUsername($name)
+    {
+        $username = strtolower(explode(' ', $name)[0]);
+        $username = str_replace(' ', '', $username);
+
+        $i = 1;
+        while (User::where('username', $username)->exists()) {
+            $username = $username . $i;
+            $i++;
+        }
+            return $username;
+    }
+
+    
 }

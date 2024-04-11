@@ -18,14 +18,21 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/login', function () {
+Route::get('login', function () {
     return view('login');
-})->name('login');
+})->name('login')->middleware('guest');
 
-Route::get('/registre', function () {
+Route::get('registre', function () {
     return view('registre');
-})->name('registre');
+})->name('registre')->middleware('guest');
 
-Route::post('/login', [UserController::class, 'login'])->name('login');
+Route::post('login', [UserController::class, 'login'])->name('login')->middleware('guest');
 
-Route::post('/registre', [UserController::class, 'registre'])->name('registre');
+Route::get('login-google', [UserController::class, 'loginGoogle'])->name('login-google')->middleware('guest');;
+
+Route::get('/google-callback', [UserController::class, 'googleCallback'])->name('google-callback')->middleware('guest');;
+
+Route::post('registre', [UserController::class, 'registre'])->name('registre')->middleware('guest');
+
+Route::post('logout', [UserController::class, 'logout'])->name('logout')->middleware('auth');
+

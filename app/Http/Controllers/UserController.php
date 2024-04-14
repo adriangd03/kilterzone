@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\User_friend;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Password;
@@ -14,6 +15,209 @@ use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
 {
+
+    /**
+     * Funció per a mostrar la pàgina principal
+     * @return \Illuminate\Contracts\View\View Retorna la vista de la pàgina principal
+     */
+    public function home()
+    {
+        try {
+
+            if(!Auth::check()){
+                return view('home', ['friends' => []]);
+            }   
+            // Retornem la vista de la pàgina principal acompañada de les dades dels usuaris amics
+            $user_friends = User_friend::where(function ($query) {
+                $query->where('user_id', Auth::user()->id)
+                      ->orWhere('friend_id', Auth::user()->id);
+            })->where('accepted', 1)->get();
+
+            // Mapejem les dades per a obtenir les dades dels usuaris amics
+            // $friends = $user_friends->map(function ($friend) {
+            //     return User::where('id', $friend->friend_id)->first();
+            // });
+            // $friends = $friends->concat($user_friends->map(function ($friend) {
+            //     return User::where('id', $friend->user_id)->first();
+            // }));
+            $friends = $user_friends->map(function ($user_friends) {
+                if ( (int) $user_friends->user_id == (int) Auth::user()->id) {
+                    return User::where('id', $user_friends->friend_id)->first();
+                } else {
+                    return User::where('id', $user_friends->user_id)->first();
+                }
+            });
+
+            // Treiem els usuaris repetits
+            $friends = $friends->unique(); 
+
+            return view('home', compact('friends'));
+        } catch (\Exception $e) {
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' . $e);
+            return view('home', ['friends' => []]);
+        }
+    }
+
+    /**
+     * Funció per a acceptar una sol·licitud d'amistat
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina principal o a la pàgina anterior
+     * @throws \Exception Si hi ha algun error en el procés d'acceptar la sol·licitud d'amistat
+     */
+    function enviarSolicitudAmic(Request $request)
+    {
+        // Validem les dades de la petició
+        $request->validate([
+            'friend_id' => 'required|exists:users,id',
+        ]);
+
+        // Creem una nova relació d'amistat
+        $friend = new User_friend();
+        $friend->user_id = Auth::user()->id;
+        $friend->friend_id = $request->friend_id;
+        $friend->save();
+
+        // Retornem un missatge de confirmació
+        return redirect()->back()->with('success', 'S\'ha enviat la sol·licitud d\'amistat');
+    }
+
+    /**
+     * Funció per a acceptar una sol·licitud d'amistat
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina principal o a la pàgina anterior
+     * @throws \Exception Si hi ha algun error en el procés d'acceptar la sol·licitud d'amistat
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    function acceptarSolicitudAmic(Request $request)
+    {
+
+        try {
+
+            // Validem les dades de la petició
+            $request->validate(
+                [
+                    'friend_id' => 'required|exists:users,id',
+                ],
+                [
+                    'friend_id.required' => "No s'ha trobat l'amic a acceptar",
+                    'friend_id.exists' => 'Aquest usuari no existeix',
+                ]
+            );
+
+            // Busquem la relació d'amistat
+            $friend = User_friend::where('user_id', $request->friend_id)->where('friend_id', Auth::user()->id)->first();
+
+            // Comprovem si la relació existeix
+            if ($friend) {
+                // Acceptem la sol·licitud d'amistat
+                $friend->accepted = 1;
+                $friend->save();
+            } else {
+                // Si no existeix la relació retornem un error
+                return redirect()->back()->with('error', 'No s\'ha trobat la sol·licitud d\'amistat a acceptar');
+            }
+            // Comprovem si l'usuari han enviat anteriorment una sol·licitud d'amistat
+            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $request->friend_id)->first();
+
+            // Comprovem si la relació existeix
+            if ($friend) {
+                // Si existeix la esborrem
+                $friend->delete();
+            }
+
+            // Retornem un missatge de confirmació
+            return redirect()->back()->with('success', 'S\'ha acceptat la sol·licitud d\'amistat');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'acceptarSolicitudAmic')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'acceptar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard');
+        }
+    }
+
+    /**
+     * Funció per a rebutjar una sol·licitud d'amistat
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina principal o a la pàgina anterior
+     * @throws \Exception Si hi ha algun error en el procés de rebutjar la sol·licitud d'amistat
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    function rebutjarSolicitudAmic(Request $request)
+    {
+        try {
+            // Validem les dades de la petició
+            $request->validate(
+                [
+                    'friend_id' => 'required|exists:users,id',
+                ],
+                [
+                    'friend_id.required' => "No s'ha trobat l'amic a rebutjar",
+                    'friend_id.exists' => 'Aquest usuari no existeix',
+                ]
+            );
+
+            // Busquem la relació d'amistat
+            $friend = User_friend::where('user_id', $request->friend_id)->where('friend_id', Auth::user()->id)->first();
+
+            // Comprovem si la relació existeix
+            if ($friend) {
+                // Si existeix la esborrem
+                $friend->delete();
+            } else {
+                // Si no existeix la relació retornem un error
+                return redirect()->back()->with('error', 'No s\'ha trobat la sol·licitud d\'amistat a rebutjar');
+            }
+
+            // Retornem un missatge de confirmació
+            return redirect()->back()->with('success', 'S\'ha rebutjat la sol·licitud d\'amistat');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'rebutjarSolicitudAmic')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de rebutjar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard');
+        }
+    }
+
+    /**
+     * Funció per a cancelar una sol·licitud d'amistat
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina principal o a la pàgina anterior
+     * @throws \Exception Si hi ha algun error en el procés de cancelar la sol·licitud d'amistat
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    function cancelarSolicitudAmic(Request $request)
+    {
+        try {
+            // Validem les dades de la petició
+            $request->validate(
+                [
+                    'friend_id' => 'required|exists:users,id',
+                ],
+                [
+                    'friend_id.required' => "No s'ha trobat l'amic a cancelar",
+                    'friend_id.exists' => 'Aquest usuari no existeix',
+                ]
+            );
+
+            // Busquem la relació d'amistat
+            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $request->friend_id)->first();
+
+            // Comprovem si la relació existeix
+            if ($friend) {
+                // Si existeix la esborrem
+                $friend->delete();
+            } else {
+                // Si no existeix la relació retornem un error
+                return redirect()->back()->with('error', 'No s\'ha trobat la sol·licitud d\'amistat a cancelar');
+            }
+
+            // Retornem un missatge de confirmació
+            return redirect()->back()->with('success', 'S\'ha cancelat la sol·licitud d\'amistat');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'cancelarSolicitudAmic')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de cancelar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard');
+        }
+    }
+
     /**
      * Funció per a iniciar sessió
      * @param Request $request Dades de la petició
@@ -112,7 +316,7 @@ class UserController extends Controller
             Auth::login($user);
             return redirect()->route('home')->with('success', 'S\'ha iniciat sessió correctament');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'inici de sessió amb Google, tornar a provar o prova-ho més tard' );
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'inici de sessió amb Google, tornar a provar o prova-ho més tard');
         }
     }
 
@@ -159,7 +363,7 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->validator->getMessageBag(), 'registre')->withInput();
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => "Hi ha ocurregut un problema en el procés de registre, tornar a provar o prova-ho més tard" ,], 'registre');
+            return back()->withErrors(['error' => "Hi ha ocurregut un problema en el procés de registre, tornar a provar o prova-ho més tard",], 'registre');
         }
     }
 
@@ -168,6 +372,7 @@ class UserController extends Controller
      * @param Request $request Dades de la petició
      * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina principal
      * @throws \Exception Si hi ha algun error en el procés de tancar sessió
+    
      */
     public function logout(Request $request)
     {
@@ -204,7 +409,7 @@ class UserController extends Controller
                 ]
             );
             $user = User::where('email', $request->email)->first();
-            
+
             if (!$user->password) {
                 return redirect()->back()->with('error', 'Aquest usuari no té permisos per a restablir la contrasenya');
             }
@@ -214,7 +419,6 @@ class UserController extends Controller
             $user->sendPasswordResetNotification($token);
 
             return redirect()->route('login')->with('success', 'S\'ha enviat un correu electrònic per a restablir la contrasenya');
-
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->validator->getMessageBag(), 'recuperar')->withInput();
         } catch (\Exception $e) {
@@ -223,7 +427,7 @@ class UserController extends Controller
     }
 
 
-        /**
+    /**
      * Mostra el formulari per restaurar la contrasenya
      * @param Request $request dades de l'usuari
      * @return redirecció a la pàgina de restaurar contrassenya si no hi ha cap error, altrament redirigir a la pàgina de login amb error
@@ -247,7 +451,8 @@ class UserController extends Controller
      * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
      * @throws \Exception Si hi ha algun error en el procés de restablir la contrasenya
      */
-    public function restaurarContrasenya(Request $request){
+    public function restaurarContrasenya(Request $request)
+    {
         try {
             $request->validate(
                 [
@@ -295,16 +500,63 @@ class UserController extends Controller
                 if ($status == Password::INVALID_TOKEN) {
                     return back()->withInput()->withErrors(['error' => ['El token no és vàlid, reinicia el procés de recuperació de contrasenya']], 'restaurar');
                 }
-
             }
 
             return back()->withInput()->withErrors(['error' => ['Hi ha hagut un error al restablir la contrasenya']], 'restaurar');
-
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->validator->getMessageBag(), 'restaurarContrasenya')->withInput();
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de restablir la contrasenya, tornar a provar o prova-ho més tard');
         }
+    }
 
+    /**
+     * Funció per a enviar un missatge
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\JsonResponse Retorna un missatge en format JSON
+     * @throws \Exception Si hi ha algun error en el procés d'enviar el missatge
+     */
+    public function sendMessage(Request $request)
+    {
+        try {
+            event(new \App\Events\SendMessageToClientEvent($request->message, auth::user()));
+            return response()->json(['message' => 'Missatge enviat correctament']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar el missatge, tornar a provar o prova-ho més tard'], 500);
+        }
+    }
+
+    /**
+     * Funció per a enviar un missatge a un client
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\JsonResponse Retorna un missatge en format JSON
+     * @throws \Exception Si hi ha algun error en el procés d'enviar el missatge
+     */
+    public function sendMessageToClient(Request $request)
+    {
+        try {
+
+            $request->validate(
+                [
+                    'message' => 'required',
+                    'receiver' => 'required|exists:users,id',
+                ],
+                [
+                    'message.required' => 'El camp missatge és obligatori',
+                    'receiver.required' => 'El camp receptor és obligatori',
+                    'receiver.exists' => 'Aquest receptor no existeix',
+                ]
+            );
+
+            $receiver = User::where('id', $request->receiver)->first();
+
+            event(new \App\Events\ChatMessage($request->message, auth::user(), $receiver));
+
+            return response()->json(['message' => 'Missatge enviat correctament']);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->validator->getMessageBag()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar el missatge, tornar a provar o prova-ho més tard' . $e], 500);
+        }
     }
 }

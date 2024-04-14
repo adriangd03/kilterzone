@@ -16,3 +16,11 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('presence.SendMessageToClientEvent.{id}', function ($user, $id) {
+    return $user;
+});
+
+Broadcast::channel('presence.ChatMessage.{id}', function ($user, $id) {
+    return $user;
+});

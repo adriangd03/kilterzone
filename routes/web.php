@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::get('/', [UserController::class, 'home'])->name('home');
 
 Route::get('login', function () {
     return view('login');
@@ -42,3 +40,6 @@ Route::get('restaurarContrasenya/{token}', [UserController::class, 'restaurarFor
 
 Route::post('restaurarContrasenya', [UserController::class, 'restaurarContrasenya'])->name('restaurarContrasenya.post')->middleware('guest');
 
+Route::post('/api/send-message', [UserController::class, 'sendMessage'])->name('send-message')->middleware('auth');
+
+Route::post('/api/send-message-to-client', [UserController::class, 'sendMessageToClient'])->name('send-message-to-client')->middleware('auth');

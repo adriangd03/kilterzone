@@ -1,3 +1,7 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+
 .card-text p {
     word-break: break-word;
 }
@@ -5,4 +9,8 @@
 .chat-list {
     height: 60vh;
     overflow-y: auto;
+}
+
+.user-selected {
+    background-color: #f0f0f0;
 }

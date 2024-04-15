@@ -1,13 +1,7 @@
 @extends('layouts.master')
+
 @section('title', 'Home')
 
-@section('styles')
-@vite('resources/css/app.css')
-@endsection
-
-@section('scripts')
-@vite(['resources/js/app.js'])
-@endsection
 
 @section('content')
 
@@ -22,12 +16,7 @@
 
 
 
-@auth
-<button class="btn btn-primary" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-    Obrir xat
-</button>
-<input type="hidden" id="userId" value="{{ Auth::user()->id }}">
-@endauth
+
 
 
 @auth
@@ -53,7 +42,7 @@
                             <div class="card-body h-100 overflow-auto mh-100">
                                 <div id="users" class="users-list row mh-100">
                                     @foreach($friends as $friend)
-                                    <div class="user col-4" id="{{ $friend->id }}">
+                                    <div class="user col-4 pl-1 justify-content-center text-center" id="{{ $friend->id }}">
                                         <div class="user-info">
                                             <img class="rounded-circle" src="{{$friend->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
                                             <div class="card-text">

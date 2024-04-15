@@ -1,12 +1,12 @@
 # ToDo
 - Acabar wireframe
 - Mockup
-- Disseny pop-up/modal enviació de missatges
-- Diagrama de BDD
-- Registre
-- Login
-- Home
-- Recuperació de contrasenya
+- Millorar disseny
+- Mostrar missatges
+- Notificacions/Missatges no llegits?
+
+
+
 
 # Pàgines
 - Home 

@@ -32,3 +32,4 @@ window.Echo = new Echo({
     enabledTransports: ['ws', 'wss'],
     encrypted: false
 });
+

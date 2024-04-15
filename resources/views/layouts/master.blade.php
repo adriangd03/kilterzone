@@ -10,6 +10,7 @@
     @include('partials.scripts')
     @yield('styles')
     @yield('scripts')
+    
 </head>
 
 <body>

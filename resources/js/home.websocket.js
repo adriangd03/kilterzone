@@ -4,6 +4,7 @@
 const form = document.getElementById("form");
 const chat = document.getElementById("chat-user");
 const userId = document.getElementById("userId").value;
+const authUserAvatar = document.getElementById("user_avatar").src;
 // Constant del canal de Echo
 // const channel = Echo.join("presence.SendMessageToClientEvent.1");
 const channel2 = Echo.join(`presence.ChatMessage.${userId}`);
@@ -34,27 +35,7 @@ channel2
     .listen(".ChatMessage", (event) => {
         console.log("event", event);
 
-        const message = document.createElement("div");
-        const img = document.createElement("img");
-        const username = event.user.username;
-        img.src = event.user.avatar;
-
-        message.innerHTML = `
-          <div class="d-flex justify-content-between">
-              <p class="small mb-1">${username}</p>
-              <p class="small mb-1 text-muted">23 Jan 2:00 pm</p>
-            </div>
-            <div class="d-flex flex-row justify-content-start">
-              <img class="rounded-circle" src="${event.user.avatar}"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div class="card-text">
-                <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${event.message}</p>
-              </div>
-            </div>
-    `;
-
-        chat.appendChild(message);
-        chat.scrollTop = chat.scrollHeight;
+        showReceivedMessage(event);
     });
 
 // Listener del formulari
@@ -67,6 +48,7 @@ form.addEventListener("submit", (e) => {
         .post("/api/send-message-to-client", formData)
         .then((response) => {
             console.log(response);
+            showSentMessage(formData.get("message"));
             form.reset();
         })
         .catch((error) => {
@@ -77,15 +59,19 @@ form.addEventListener("submit", (e) => {
 // Listener dels usuaris per obrir xat
 document.querySelectorAll(".user").forEach((user) => {
     user.addEventListener("click", (e) => {
-        
-
-        // get the user div that was clicked
+        // Agafar el user div que s'ha clicat
         const userDiv = e.target.closest(".user");
         const userId = userDiv.id;
-        
-        
 
+        // Remoure la classe user-selected de tots els usuaris
+        document.querySelectorAll(".user").forEach((user) => {
+            user.classList.remove("user-selected");
+        });
 
+        // Afegir la classe user-selected al user clicat
+        userDiv.classList.add("user-selected");
+
+        // Setejar el valor del receiver input amb l'id del user clicat
         document.getElementById("receiver").value = userId;
 
         chat.innerHTML = "";
@@ -146,4 +132,47 @@ function showMessages(messages) {
         chat.appendChild(messageDiv);
         chat.scrollTop = chat.scrollHeight;
     });
+}
+
+function showReceivedMessage(event) {
+    const message = document.createElement("div");
+    const img = document.createElement("img");
+    const username = event.user.username;
+    img.src = event.user.avatar;
+
+    message.innerHTML = `
+          <div class="d-flex justify-content-between">
+              <p class="small mb-1">${username}</p>
+              <p class="small mb-1 text-muted">23 Jan 2:00 pm</p>
+            </div>
+            <div class="d-flex flex-row justify-content-start">
+              <img class="rounded-circle" src="${event.user.avatar}"
+                alt="avatar 1" style="width: 45px; height: 100%;">
+              <div class="card-text">
+                <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${event.message}</p>
+              </div>
+            </div>
+    `;
+
+    chat.appendChild(message);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function showSentMessage(message) {
+    const messageDiv = document.createElement("div");
+    messageDiv.innerHTML = `
+        <div class="d-flex justify-content-between">
+            <p class="small mb-1">You</p>
+            <p class="small mb-1 text-muted">23 Jan 2:00 pm</p>
+          </div>
+          <div class="d-flex flex-row justify-content-end">
+          <img class="rounded-circle" src="${authUserAvatar}"
+              alt="avatar 1" style="width: 45px; height: 100%;">
+            <div class="card-text">
+              <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${message}</p>
+            </div>
+          </div>
+  `;
+    chat.appendChild(messageDiv);
+    chat.scrollTop = chat.scrollHeight;
 }

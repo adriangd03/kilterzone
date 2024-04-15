@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\User_friend;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Password;
+use App\Models\User_message;
+use Illuminate\Database\Eloquent\Builder;
 
 
 class UserController extends Controller
@@ -33,13 +34,7 @@ class UserController extends Controller
                       ->orWhere('friend_id', Auth::user()->id);
             })->where('accepted', 1)->get();
 
-            // Mapejem les dades per a obtenir les dades dels usuaris amics
-            // $friends = $user_friends->map(function ($friend) {
-            //     return User::where('id', $friend->friend_id)->first();
-            // });
-            // $friends = $friends->concat($user_friends->map(function ($friend) {
-            //     return User::where('id', $friend->user_id)->first();
-            // }));
+            // Mapejem els usuaris amics
             $friends = $user_friends->map(function ($user_friends) {
                 if ( (int) $user_friends->user_id == (int) Auth::user()->id) {
                     return User::where('id', $user_friends->friend_id)->first();
@@ -510,21 +505,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Funció per a enviar un missatge
-     * @param Request $request Dades de la petició
-     * @return \Illuminate\Http\JsonResponse Retorna un missatge en format JSON
-     * @throws \Exception Si hi ha algun error en el procés d'enviar el missatge
-     */
-    public function sendMessage(Request $request)
-    {
-        try {
-            event(new \App\Events\SendMessageToClientEvent($request->message, auth::user()));
-            return response()->json(['message' => 'Missatge enviat correctament']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar el missatge, tornar a provar o prova-ho més tard'], 500);
-        }
-    }
 
     /**
      * Funció per a enviar un missatge a un client
@@ -538,20 +518,41 @@ class UserController extends Controller
 
             $request->validate(
                 [
-                    'message' => 'required',
+                    'message' => 'required|string|max:255',
                     'receiver' => 'required|exists:users,id',
                 ],
                 [
                     'message.required' => 'El camp missatge és obligatori',
                     'receiver.required' => 'El camp receptor és obligatori',
                     'receiver.exists' => 'Aquest receptor no existeix',
+                    'message.string' => 'El camp missatge ha de ser una cadena de caràcters',
+                    'message.max' => 'El camp missatge ha de tenir un màxim de 255 caràcters',
                 ]
             );
-
+            // Busquem l'usuari receptor
             $receiver = User::where('id', $request->receiver)->first();
 
+            // Comprovem si l'usuari receptor és amic de l'usuari autenticat
+            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function(Builder $query) use ($receiver){
+                $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
+            })->first();
+
+            // Si no és amic retornem un error
+            if (!$friend) {
+                return response()->json(['error' => 'No pots enviar missatges a aquest usuari'], 403);
+            }
+
+            // Enviem el missatge
             event(new \App\Events\ChatMessage($request->message, auth::user(), $receiver));
 
+            // Guardem el missatge a la base de dades
+            $message = new User_message();
+            $message->user_id = Auth::user()->id;
+            $message->receiver_id = $receiver->id;
+            $message->message = $request->message;
+            $message->save();
+
+            // Retornem un missatge de confirmació
             return response()->json(['message' => 'Missatge enviat correctament']);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);

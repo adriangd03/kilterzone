@@ -5,6 +5,8 @@
 
 @section('content')
 
+
+
 @if(session('success'))
 <div class="alert alert-success">{{ session('success') }}</div>
 @endif
@@ -22,7 +24,7 @@
 @auth
 <!-- Offcanvas Chat -->
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasChat" aria-labelledby="offcanvasChatLabel">
 
 
 
@@ -31,7 +33,7 @@
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body h-100">
-        <div class="row h-100">
+        <div class="row h-100 ">
             <div class="col-12">
                 <div class="row mb-3">
                     <div class="col-12">
@@ -42,7 +44,7 @@
                             <div class="card-body h-100 overflow-auto mh-100">
                                 <div id="users" class="users-list row mh-100">
                                     @foreach($friends as $friend)
-                                    <div class="user col-4 pl-1 justify-content-center text-center" id="{{ $friend->id }}">
+                                    <div class="user col-4 p-2 justify-content-center position-relative text-center" id="{{ $friend->id }}">
                                         <div class="user-info">
                                             <img class="rounded-circle" src="{{$friend->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
                                             <div class="card-text">
@@ -50,21 +52,25 @@
                                                 <div class="user-status">Online</div>
                                             </div>
                                         </div>
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{$friend->unreadMessages}}
+                                            <span class="visually-hidden">Missatges sense llegir</span>
+                                        </span>
                                     </div>
                                     @endforeach
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
 
 
-                <div class="card h-75 mh-75">
+                <div class="card h-75 mh-75 mb-5">
                     <div class="card-header">
                         <h4>Xat</h4>
                     </div>
-                    <div class="card-body h-100 overflow-auto mh-100 ">
+                    <div class="card-body h-100 overflow-auto mh-100 p-0 ">
                         <div id="chat-user" class="chat-list mh-100 ">
 
                         </div>

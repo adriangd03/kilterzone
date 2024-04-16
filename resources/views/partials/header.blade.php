@@ -27,7 +27,11 @@
             <!-- button to open chat and search input -->
             <div class="d-flex align-items-center">
                 @auth
-                <button class="btn btn-dark border border-white" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                <button class="btn btn-dark border border-white position-relative" data-bs-toggle="offcanvas" href="#offcanvasChat" role="button" aria-controls="offcanvasChat">
+                    <span id="notificacionsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ $totalUnreadMessages }}
+                        <span class="visually-hidden">Missatges sense llegir</span>
+                    </span>
                     <i class="bi bi-chat-left-dots"></i>
                 </button>
                 <input type="hidden" id="userId" value="{{ Auth::user()->id }}">

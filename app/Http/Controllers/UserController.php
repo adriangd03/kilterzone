@@ -46,7 +46,20 @@ class UserController extends Controller
             // Treiem els usuaris repetits
             $friends = $friends->unique(); 
 
-            return view('home', compact('friends'));
+            // Agafem el nombre de missatges no llegits
+            $unreadMessages = User_message::where('receiver_id', Auth::user()->id)->where('read', 0)->get();
+
+            // Afegeix el nombre de missatges no llegits a cada usuari
+            $friends = $friends->map(function ($friend) use ($unreadMessages) {
+                $friend->unreadMessages = $unreadMessages->where('user_id', $friend->id)->count();
+                return $friend;
+            });
+
+            // Agafem el total de missatges no llegits
+            $totalUnreadMessages = $unreadMessages->count();
+ 
+            // Retornem la vista de la pàgina principal
+            return view('home', compact('friends', 'totalUnreadMessages'));
         } catch (\Exception $e) {
             session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' . $e);
             return view('home', ['friends' => []]);
@@ -507,7 +520,7 @@ class UserController extends Controller
 
 
     /**
-     * Funció per a enviar un missatge a un client
+     * Funció per a enviar un missatge a un usuari
      * @param Request $request Dades de la petició
      * @return \Illuminate\Http\JsonResponse Retorna un missatge en format JSON
      * @throws \Exception Si hi ha algun error en el procés d'enviar el missatge
@@ -560,4 +573,56 @@ class UserController extends Controller
             return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar el missatge, tornar a provar o prova-ho més tard' . $e], 500);
         }
     }
+
+    /**
+     * Funció per agafar els missatges d'un usuari amb un altre usuari
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\JsonResponse Retorna els missatges en format JSON
+     * @throws \Exception Si hi ha algun error en el procés d'agafar els missatges
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    public function getUserMessages(Request $request){
+        try {
+            $request->validate(
+                [
+                    'userId' => 'required|exists:users,id',
+                ],
+                [
+                    'userId.required' => 'El camp receptor és obligatori',
+                    'userId.exists' => 'Aquest receptor no existeix',
+                ]
+            );
+
+            // Busquem l'usuari receptor
+            $receiver = User::where('id', $request->userId)->first();
+
+            // Comprovem si l'usuari receptor és amic de l'usuari autenticat
+            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function(Builder $query) use ($receiver){
+                $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
+            })->first();
+
+            // Si no és amic retornem un error
+            if (!$friend) {
+                return response()->json(['error' => 'No pots veure els missatges d\'aquest usuari'], 403);
+            }
+
+            // Busquem els missatges de l'usuari amb l'usuari receptor
+            $messages = User_message::where(function ($query) use ($receiver){
+                $query->where('user_id', Auth::user()->id)
+                      ->where('receiver_id', $receiver->id);
+            })->orWhere(function ($query) use ($receiver) {
+                $query->where('user_id', $receiver->id)
+                      ->where('receiver_id', Auth::user()->id);
+            })->get();
+
+            // Retornem els missatges
+            return response()->json(['messages' => $messages]);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->validator->getMessageBag()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'agafar els missatges, tornar a provar o prova-ho més tard' . $e], 500);
+        }
+    }
+
+
 }

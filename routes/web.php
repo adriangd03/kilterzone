@@ -43,3 +43,5 @@ Route::post('restaurarContrasenya', [UserController::class, 'restaurarContraseny
 Route::post('/api/send-message', [UserController::class, 'sendMessage'])->name('send-message')->middleware('auth');
 
 Route::post('/api/send-message-to-client', [UserController::class, 'sendMessageToClient'])->name('send-message-to-client')->middleware('auth');
+
+Route::post('/api/get-user-messages', [UserController::class, 'getUserMessages'])->name('get-user-messages')->middleware('auth');

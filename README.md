@@ -2,7 +2,7 @@
 - Acabar wireframe
 - Mockup
 - Millorar disseny
-- Mostrar missatges
+- notificaciones y mensajes de error
 - Notificacions/Missatges no llegits?
 
 

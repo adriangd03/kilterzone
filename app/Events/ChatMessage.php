@@ -46,7 +46,7 @@ class ChatMessage implements ShouldBroadcast
     {
         return [
             'message' => $this->message,
-            'user' => $this->user->only(['username', 'avatar']),
+            'user' => $this->user->only(['username', 'avatar', 'id']),
             'receiver' => $this->receiver->only(['username', 'avatar']),
         ];
     }

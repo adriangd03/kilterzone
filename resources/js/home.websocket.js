@@ -5,27 +5,11 @@ const form = document.getElementById("form");
 const chat = document.getElementById("chat-user");
 const userId = document.getElementById("userId").value;
 const authUserAvatar = document.getElementById("user_avatar").src;
-// Constant del canal de Echo
-// const channel = Echo.join("presence.SendMessageToClientEvent.1");
+const notificacionsBadge = document.getElementById("notificacionsBadge");
+const receiver = document.getElementById("receiver");
+const offCanvas = document.getElementById("offcanvasChat");
 const channel2 = Echo.join(`presence.ChatMessage.${userId}`);
-
-// Event de subscripció al canal i escolta de l'event
-// channel
-//     .here((users) => {
-//       console.log("subscribed");
-//       console.log({ users });
-//       showConnectedUsers(users);
-//     })
-//     .joining((user) => {
-//         console.log({ user }, "joining");
-//         addUser(user);
-
-//     })
-//     .leaving((user) => {
-//         console.log({ user }, "leaving");
-//         deleteUser(user);
-
-//     })
+const messages = {};
 
 channel2
     .here((users) => {
@@ -35,7 +19,21 @@ channel2
     .listen(".ChatMessage", (event) => {
         console.log("event", event);
 
-        showReceivedMessage(event);
+        // Comprovar si el chat obert és el mateix que l'usuari que ha enviat el missatge
+        if (receiver.value == event.user.id) {
+            showReceivedMessage(event.message, event.user.avatar, event.user.username, new Date());
+        }else{
+            // Si no es el mateix usuari, mostrar la notificació
+            notificacionsBadge.style.display = "block";
+            notificacionsBadge.innerHTML = parseInt(notificacionsBadge.innerHTML) + 1;
+        }
+
+
+        // Afegir el missatge a la variable messages
+        if (messages[event.user.id]) {
+            messages[event.user.id].messages.push({ message: event.message, user_id: event.user.id, receiver_id: userId, created_at: new Date()});
+        }
+
     });
 
 // Listener del formulari
@@ -48,20 +46,25 @@ form.addEventListener("submit", (e) => {
         .post("/api/send-message-to-client", formData)
         .then((response) => {
             console.log(response);
-            showSentMessage(formData.get("message"));
+            showSentMessage(formData.get("message"), new Date());
             form.reset();
+            // Afegir el missatge a la variable messages
+            if (messages[formData.get("receiver")]) {
+                messages[formData.get("receiver")].messages.push({ message: formData.get("message"), user_id: userId , receiver_id: formData.get("receiver"), created_at: new Date()});
+            }
         })
         .catch((error) => {
             console.error(error);
         });
 });
 
-// Listener dels usuaris per obrir xat
 document.querySelectorAll(".user").forEach((user) => {
     user.addEventListener("click", (e) => {
         // Agafar el user div que s'ha clicat
         const userDiv = e.target.closest(".user");
         const userId = userDiv.id;
+        const userAvatar = userDiv.querySelector("img").src;
+        const username = userDiv.querySelector(".user-name").textContent;
 
         // Remoure la classe user-selected de tots els usuaris
         document.querySelectorAll(".user").forEach((user) => {
@@ -72,98 +75,77 @@ document.querySelectorAll(".user").forEach((user) => {
         userDiv.classList.add("user-selected");
 
         // Setejar el valor del receiver input amb l'id del user clicat
-        document.getElementById("receiver").value = userId;
+        receiver.value = userId;
 
+        // Esborrar tots els missatges del xat
         chat.innerHTML = "";
+
+        // Comprobem si ja hem carregat els missatges d'aquest usuari
+        if (messages[userId]) {
+            // Mostrar els missatges
+            showMessages(messages[userId], userAvatar, username);
+            return;
+        }
+
+        // Mostrar els missatges
+        grabUserMessages(userId, userAvatar, username);
     });
 });
 
-// Show connected users
-function showConnectedUsers(users) {
-    let usersDiv = document.getElementById("users");
-    usersDiv.innerHTML = "";
 
-    users.forEach((user) => {
-        let userDiv = document.createElement("div");
-        userDiv.innerHTML =
-            `<img class="rounded-circle" src="${user.avatar}"
-        alt="avatar 1" style="width: 45px; height: 100%;">
-      <div class="card-text">` + user.username;
-        userDiv.id = user.id;
-        usersDiv.appendChild(userDiv);
+
+
+/**
+ * Funció per mostrar els missatges	
+ * @param {object} messages 
+ */
+function showMessages(messages, userAvatar, username) {
+    messages.messages.forEach((message) => {
+        if (message.user_id == userId) {
+            showSentMessage(message.message, message.created_at);
+        } else {
+            showReceivedMessage(message.message, userAvatar, username, message.created_at);
+        }
     });
 }
 
-// Add connected users to the list
-function addUser(user) {
-    let usersDiv = document.getElementById("users");
-    let userDiv = document.createElement("div");
-    userDiv.innerHTML =
-        `<img class="rounded-circle" src="${user.avatar}"
-    alt="avatar 1" style="width: 45px; height: 100%;">
-  <div class="card-text">` + user.username;
-    userDiv.id = user.id;
-
-    usersDiv.appendChild(userDiv);
-}
-
-// Delete disconnected users from the list
-function deleteUser(user) {
-    let userDiv = document.getElementById(user.id);
-    userDiv.remove();
-}
-
-function showMessages(messages) {
-    messages.forEach((message) => {
-        const messageDiv = document.createElement("div");
-        messageDiv.innerHTML = `
-        <div class="d-flex justify-content-between">
-            <p class="small mb-1">${message.user.username}</p>
-            <p class="small mb-1 text-muted">23 Jan 2:00 pm</p>
-          </div>
-          <div class="d-flex flex-row justify-content-start">
-            <img class="rounded-circle" src="${message.user.avatar}"
-              alt="avatar 1" style="width: 45px; height: 100%;">
-            <div class="card-text">
-              <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${message.message}</p>
-            </div>
-          </div>
-  `;
-        chat.appendChild(messageDiv);
-        chat.scrollTop = chat.scrollHeight;
-    });
-}
-
-function showReceivedMessage(event) {
-    const message = document.createElement("div");
+/**
+ * Funció per mostrar els missatges rebuts
+ * @param {object} event 
+ */
+function showReceivedMessage(message, userAvatar, username, date) {
+    const messageDiv = document.createElement("div");
     const img = document.createElement("img");
-    const username = event.user.username;
-    img.src = event.user.avatar;
+    img.src = userAvatar;
 
-    message.innerHTML = `
+    messageDiv.innerHTML = `
           <div class="d-flex justify-content-between">
               <p class="small mb-1">${username}</p>
-              <p class="small mb-1 text-muted">23 Jan 2:00 pm</p>
+              <p class="small mb-1 text-muted">${formatDate(date)}</p>
             </div>
             <div class="d-flex flex-row justify-content-start">
-              <img class="rounded-circle" src="${event.user.avatar}"
+              <img class="rounded-circle" src="${userAvatar}"
                 alt="avatar 1" style="width: 45px; height: 100%;">
               <div class="card-text">
-                <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${event.message}</p>
+                <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${message}</p>
               </div>
             </div>
     `;
 
-    chat.appendChild(message);
+    chat.appendChild(messageDiv);
     chat.scrollTop = chat.scrollHeight;
 }
 
-function showSentMessage(message) {
+/**
+ * Mostrar missatge enviat per l'usuari
+ * @param {string} message 
+ */
+function showSentMessage(message, date) {
     const messageDiv = document.createElement("div");
     messageDiv.innerHTML = `
         <div class="d-flex justify-content-between">
             <p class="small mb-1">You</p>
-            <p class="small mb-1 text-muted">23 Jan 2:00 pm</p>
+            <p class="small mb-1 text-muted">${formatDate(date)}</p>
           </div>
           <div class="d-flex flex-row justify-content-end">
           <img class="rounded-circle" src="${authUserAvatar}"
@@ -175,4 +157,49 @@ function showSentMessage(message) {
   `;
     chat.appendChild(messageDiv);
     chat.scrollTop = chat.scrollHeight;
+}
+
+
+
+/**
+ * Funció per agafar els missatges de l'usuari amb altre usuari
+ * @param {int} userId 
+ */
+function grabUserMessages(userId, userAvatar, username) {
+    axios
+        .post(`/api/get-user-messages`, { userId })
+        .then((response) => {
+            console.log(response);
+            // Mostrar els missatges
+            showMessages(response.data, userAvatar, username);
+            // Guardar els missatges a la variable messages
+            messages[userId] = response.data;
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
+
+/**
+ * Funció per formatar la data
+ * @param {*} date 
+ * @returns Retorna la data formatejada
+ */
+function formatDate(date){
+  // comprovar si la data es d'avui
+  const d = new Date(date);
+  const now = new Date();
+  const diffTime = Math.abs(now - d);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  // Si la data es d'avui mostrar l'hora
+  if(new Date(d).setHours(0,0,0,0) == now.setHours(0,0,0,0)){
+    return d.toLocaleTimeString( 'es-ES', {hour: 'numeric', minute: 'numeric'});
+  }
+  // Si la data es d'aquest any mostrar el dia i mes
+  if(d.getFullYear() == now.getFullYear()){
+    return d.toLocaleDateString('es-ES', {month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'});
+  }
+  // Si la data no es d'aquest any mostrar la data completa
+  return d.toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'});
 }

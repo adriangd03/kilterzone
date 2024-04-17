@@ -8,9 +8,26 @@
 
 .chat-list {
     height: 60vh;
+    max-height: 60vh;
     overflow-y: auto;
 }
 
 .user-selected {
     background-color: #f0f0f0;
+}
+
+#offcanvasChat{
+    width: 100%;
+    max-width: 40vw;
+}
+
+@media screen and (max-width: 768px) {
+    #offcanvasChat{
+        max-width: 80%;
+    }
+
+    .chat-list {
+        height: 40vh;
+    }
+    
 }

@@ -22,5 +22,8 @@ Broadcast::channel('presence.SendMessageToClientEvent.{id}', function ($user, $i
 });
 
 Broadcast::channel('presence.ChatMessage.{id}', function ($user, $id) {
-    return $user;
+    if($user->id == $id){
+        return $user;
+    }
+    return false;
 });

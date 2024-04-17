@@ -2,8 +2,10 @@
 - Acabar wireframe
 - Mockup
 - Millorar disseny
-- notificaciones y mensajes de error
-- Notificacions/Missatges no llegits?
+- mensajes de error - Creo yo q ya estaría
+- Afegir amics
+- Configuració
+- Rutes/Perfil
 
 
 

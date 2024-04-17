@@ -24,17 +24,32 @@
 
             </div>
 
-            <!-- button to open chat and search input -->
+            <!-- button per obrir el xat, barra de busqueda i button per afegir amics-->
             <div class="d-flex align-items-center">
+
                 @auth
-                <button class="btn btn-dark border border-white position-relative" data-bs-toggle="offcanvas" href="#offcanvasChat" role="button" aria-controls="offcanvasChat">
-                    <span id="notificacionsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    {{ $totalUnreadMessages }}
+                
+                <button class="btn btn-dark border border-white position-relative" data-bs-toggle="offcanvas" href="#offcanvasAddFriend" role="button" aria-controls="offcanvasAddFriend">
+                    <i class="bi bi-person-plus"></i>
+                </button>
+
+                <button class="btn btn-dark border ms-3 border-white position-relative" data-bs-toggle="offcanvas" href="#offcanvasChat" role="button" aria-controls="offcanvasChat">
+                    @if($totalUnreadMessages == 0)
+                    <span id="notificacionsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                        {{ $totalUnreadMessages }}
                         <span class="visually-hidden">Missatges sense llegir</span>
                     </span>
+                    @else
+                    <span id="notificacionsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ $totalUnreadMessages }}
+                        <span class="visually-hidden">Missatges sense llegir</span>
+                    </span>
+                    @endif
+
                     <i class="bi bi-chat-left-dots"></i>
                 </button>
                 <input type="hidden" id="userId" value="{{ Auth::user()->id }}">
+
                 @endauth
 
                 <form class="d-none d-sm-inline-block me-3 ms-3 my-2 my-md-0 mw-100 navbar-search">

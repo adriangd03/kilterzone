@@ -25,18 +25,18 @@ class UserController extends Controller
     {
         try {
 
-            if(!Auth::check()){
+            if (!Auth::check()) {
                 return view('home', ['friends' => []]);
-            }   
+            }
             // Retornem la vista de la pàgina principal acompañada de les dades dels usuaris amics
             $user_friends = User_friend::where(function ($query) {
                 $query->where('user_id', Auth::user()->id)
-                      ->orWhere('friend_id', Auth::user()->id);
+                    ->orWhere('friend_id', Auth::user()->id);
             })->where('accepted', 1)->get();
 
             // Mapejem els usuaris amics
             $friends = $user_friends->map(function ($user_friends) {
-                if ( (int) $user_friends->user_id == (int) Auth::user()->id) {
+                if ((int) $user_friends->user_id == (int) Auth::user()->id) {
                     return User::where('id', $user_friends->friend_id)->first();
                 } else {
                     return User::where('id', $user_friends->user_id)->first();
@@ -44,7 +44,7 @@ class UserController extends Controller
             });
 
             // Treiem els usuaris repetits
-            $friends = $friends->unique(); 
+            $friends = $friends->unique();
 
             // Agafem el nombre de missatges no llegits
             $unreadMessages = User_message::where('receiver_id', Auth::user()->id)->where('read', 0)->get();
@@ -57,7 +57,7 @@ class UserController extends Controller
 
             // Agafem el total de missatges no llegits
             $totalUnreadMessages = $unreadMessages->count();
- 
+
             // Retornem la vista de la pàgina principal
             return view('home', compact('friends', 'totalUnreadMessages'));
         } catch (\Exception $e) {
@@ -322,7 +322,7 @@ class UserController extends Controller
             );
 
             Auth::login($user);
-            return redirect()->route('home')->with('success', 'S\'ha iniciat sessió correctament');
+            return redirect()->route('home');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'inici de sessió amb Google, tornar a provar o prova-ho més tard');
         }
@@ -546,7 +546,7 @@ class UserController extends Controller
             $receiver = User::where('id', $request->receiver)->first();
 
             // Comprovem si l'usuari receptor és amic de l'usuari autenticat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function(Builder $query) use ($receiver){
+            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function (Builder $query) use ($receiver) {
                 $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
             })->first();
 
@@ -581,7 +581,8 @@ class UserController extends Controller
      * @throws \Exception Si hi ha algun error en el procés d'agafar els missatges
      * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
      */
-    public function getUserMessages(Request $request){
+    public function getUserMessages(Request $request)
+    {
         try {
             $request->validate(
                 [
@@ -597,7 +598,7 @@ class UserController extends Controller
             $receiver = User::where('id', $request->userId)->first();
 
             // Comprovem si l'usuari receptor és amic de l'usuari autenticat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function(Builder $query) use ($receiver){
+            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function (Builder $query) use ($receiver) {
                 $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
             })->first();
 
@@ -607,13 +608,16 @@ class UserController extends Controller
             }
 
             // Busquem els missatges de l'usuari amb l'usuari receptor
-            $messages = User_message::where(function ($query) use ($receiver){
+            $messages = User_message::where(function ($query) use ($receiver) {
                 $query->where('user_id', Auth::user()->id)
-                      ->where('receiver_id', $receiver->id);
+                    ->where('receiver_id', $receiver->id);
             })->orWhere(function ($query) use ($receiver) {
                 $query->where('user_id', $receiver->id)
-                      ->where('receiver_id', Auth::user()->id);
+                    ->where('receiver_id', Auth::user()->id);
             })->get();
+
+            // Marquem els missatges com a llegits
+            User_message::where('user_id', $receiver->id)->where('receiver_id', Auth::user()->id)->update(['read' => 1]);
 
             // Retornem els missatges
             return response()->json(['messages' => $messages]);
@@ -624,5 +628,48 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Funció per a marcar els missatges de un usuari com a llegit
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\JsonResponse Retorna un missatge en format JSON
+     * @throws \Exception Si hi ha algun error en el procés de marcar el missatge com a llegit
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    public function marcarMissatgesComLLegits(Request $request)
+    {
+        try {
+            $request->validate(
+                [
+                    'userId' => 'required|exists:users,id',
+                ],
+                [
+                    'userId.required' => 'El camp receptor és obligatori',
+                    'userId.exists' => 'Aquest receptor no existeix',
+                ]
+            );
 
+            // Busquem l'usuari receptor
+            $receiver = User::where('id', $request->userId)->first();
+
+            // Comprovem si l'usuari receptor és amic de l'usuari autenticat
+            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function (Builder $query) use ($receiver) {
+                $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
+            })->first();
+
+            // Si no és amic retornem un error
+            if (!$friend) {
+                return response()->json(['error' => 'No pots marcar els missatges com a llegits d\'aquest usuari'], 403);
+            }
+
+            // Marquem els missatges com a llegits
+            User_message::where('user_id', $receiver->id)->where('receiver_id', Auth::user()->id)->update(['read' => 1]);
+
+            // Retornem un missatge de confirmació
+            return response()->json(['message' => 'Missatges marcats com a llegits']);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->validator->getMessageBag()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés de marcar els missatges com a llegits, tornar a provar o prova-ho més tard' . $e], 500);
+        }
+    }
 }

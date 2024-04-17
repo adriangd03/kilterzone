@@ -45,3 +45,5 @@ Route::post('/api/send-message', [UserController::class, 'sendMessage'])->name('
 Route::post('/api/send-message-to-client', [UserController::class, 'sendMessageToClient'])->name('send-message-to-client')->middleware('auth');
 
 Route::post('/api/get-user-messages', [UserController::class, 'getUserMessages'])->name('get-user-messages')->middleware('auth');
+
+Route::post('/api/marcar-missatges-llegits', [UserController::class, 'marcarMissatgesComLLegits'])->name('marcar-missatges-llegits')->middleware('auth');

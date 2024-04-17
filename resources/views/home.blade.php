@@ -24,7 +24,7 @@
 @auth
 <!-- Offcanvas Chat -->
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasChat" aria-labelledby="offcanvasChatLabel">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasChat" data-bs-backdrop="false" aria-labelledby="offcanvasChatLabel">
 
 
 
@@ -44,7 +44,7 @@
                             <div class="card-body h-100 overflow-auto mh-100">
                                 <div id="users" class="users-list row mh-100">
                                     @foreach($friends as $friend)
-                                    <div class="user col-4 p-2 justify-content-center position-relative text-center" id="{{ $friend->id }}">
+                                    <div class="user col-3 p-2 justify-content-center position-relative text-center" id="{{ $friend->id }}">
                                         <div class="user-info">
                                             <img class="rounded-circle" src="{{$friend->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
                                             <div class="card-text">
@@ -52,10 +52,17 @@
                                                 <div class="user-status">Online</div>
                                             </div>
                                         </div>
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        @if($friend->unreadMessages > 0)
+                                        <span id="b-{{$friend->id}}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                             {{$friend->unreadMessages}}
                                             <span class="visually-hidden">Missatges sense llegir</span>
                                         </span>
+                                        @else
+                                        <span id="b-{{$friend->id}}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                            {{$friend->unreadMessages}}
+                                            <span class="visually-hidden">Missatges sense llegir</span>
+                                        </span>
+                                        @endif
                                     </div>
                                     @endforeach
                                 </div>
@@ -66,21 +73,19 @@
                 </div>
 
 
-                <div class="card h-75 mh-75 mb-5">
+                <div class="card mb-5">
                     <div class="card-header">
                         <h4>Xat</h4>
                     </div>
-                    <div class="card-body h-100 overflow-auto mh-100 p-0 ">
-                        <div id="chat-user" class="chat-list mh-100 ">
-
-                        </div>
+                    <div id="chat-user" class="card-body chat-list  overflow-auto ">
+                    
                     </div>
-                    <div class="card-footer">
-                        <form action="" id='form' method="post">
+                    <div class="card-footer pe-5">
+                        <form id='chatForm' method="post">
                             <div class="input-group">
                                 <input type="text" name="message" class="form-control" placeholder="Escriu el teu missatge aquí...">
-                                <input type="hidden" name="receiver" id="receiver" value="">
-                                <button type="submit" class="btn btn-primary">Send</button>
+                                <input type="hidden" name="receiver" id="receiver" value="0">
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
                             </div>
                         </form>
                     </div>

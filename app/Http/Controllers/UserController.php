@@ -24,11 +24,11 @@ class UserController extends Controller
     public function home()
     {
         try {
-
+            // Comprovem si l'usuari està autenticat i si no ho està retornem la vista de la pàgina principal
             if (!Auth::check()) {
-                return view('home', ['friends' => []]);
+                return view('home');
             }
-            // Retornem la vista de la pàgina principal acompañada de les dades dels usuaris amics
+            // Agafem tots les relacions d'amistat acceptades on l'usuari autenticat estigui implicat
             $user_friends = User_friend::where(function ($query) {
                 $query->where('user_id', Auth::user()->id)
                     ->orWhere('friend_id', Auth::user()->id);
@@ -55,11 +55,14 @@ class UserController extends Controller
                 return $friend;
             });
 
+            // Agafem tots els usuaris que no siguin amics
+            $notFriends = User::get()->diff($friends)->where('id', '!=', Auth::user()->id);
+
             // Agafem el total de missatges no llegits
             $totalUnreadMessages = $unreadMessages->count();
 
             // Retornem la vista de la pàgina principal
-            return view('home', compact('friends', 'totalUnreadMessages'));
+            return view('home', compact('friends', 'totalUnreadMessages', 'notFriends'));
         } catch (\Exception $e) {
             session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' . $e);
             return view('home', ['friends' => []]);

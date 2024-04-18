@@ -1,49 +1,28 @@
 // Path: resources/js/home.websocket.js
 
-// Constant del formulari i xat
+
+// Constant del formulari de missatges del xat
 const form = document.getElementById("chatForm");
+// Constant del xat
 const chat = document.getElementById("chat-user");
+// Constant del id de l'usuari autenticat
 const userId = document.getElementById("userId").value;
+// Constant del avatar de l'usuari autenticat
 const authUserAvatar = document.getElementById("user_avatar").src;
+// Constant del badge de notificacions
 const notificacionsBadge = document.getElementById("notificacionsBadge");
+// Constant del receiver input del xat
 const receiver = document.getElementById("receiver");
+// Assignar el valor 0 al receiver input
 receiver.value = 0;
+// Constant del offcanvas del xat
 const offCanvas = document.getElementById("offcanvasChat");
-const channel2 = Echo.join(`presence.ChatMessage.${userId}`);
+// Constant del canal de xat
+const channel = Echo.join(`presence.ChatMessage.${userId}`);
+// Constant del canal per els usuaris online, per saber si estan escrivint i per el enviament de solicituds d'amistat
+const channel2 = Echo.join('presence.UsersOnline');
+// Constant de missatges per guardar els missatges carregats
 const messages = {};
-
-channel2
-    .here((users) => {
-        console.log("subscribed");
-        console.log({ users });
-    })
-    .listen(".ChatMessage", (event) => {
-        console.log("event", event);
-
-        // Comprovar si el chat obert és el mateix que l'usuari que ha enviat el missatge
-        if (receiver.value == event.user.id) {
-            showReceivedMessage(
-                event.message,
-                event.user.avatar,
-                event.user.username,
-                new Date()
-            );
-            marcarMissatgesComLlegits(event.user.id);
-        } else {
-            // Si no es el mateix usuari, mostrar la notificació
-            sumarNotificacionsUser(event.user.id);
-        }
-
-        // Afegir el missatge a la variable messages
-        if (messages[event.user.id]) {
-            messages[event.user.id].messages.push({
-                message: event.message,
-                user_id: event.user.id,
-                receiver_id: userId,
-                created_at: new Date(),
-            });
-        }
-    });
 
 
 // Listener del formulari de missatges del xat
@@ -90,15 +69,91 @@ $('.user').on('click', seleccionarUsuari);
 
 // Evitar que es seleccioni el text quan es fa doble click
 $('.user').on('mousedown', (e) => {
-
     if (e.detail > 1) {
         e.preventDefault();
-
-
     }
-
-
 });
+
+// Listener del input de missatge
+$('#message').on('keyup', (e) => {
+    if (e.target.value.trim() == "") {
+        channel2.whisper('typing', {
+            user_id: userId,
+            receiver_id: receiver.value,
+            typing: false
+        });
+        return;
+    }
+    if (receiver.value == 0) {
+        return;
+    }
+    console.log('typing');
+    channel2.whisper('typing', {
+        user_id: userId,
+        receiver_id: receiver.value,
+        typing: true
+    });
+});
+
+channel
+    .here((users) => {
+        console.log({ users });
+    })
+    .listen(".ChatMessage", (event) => {
+        console.log("event", event);
+
+        // Comprovar si el chat obert és el mateix que l'usuari que ha enviat el missatge
+        if (receiver.value == event.user.id) {
+            showReceivedMessage(
+                event.message,
+                event.user.avatar,
+                event.user.username,
+                new Date()
+            );
+            marcarMissatgesComLlegits(event.user.id);
+            $('#typing').hide();
+        } else {
+            // Si no es el mateix usuari, mostrar la notificació
+            sumarNotificacionsUser(event.user.id);
+        }
+
+        // Afegir el missatge a la variable messages
+        if (messages[event.user.id]) {
+            messages[event.user.id].messages.push({
+                message: event.message,
+                user_id: event.user.id,
+                receiver_id: userId,
+                created_at: new Date(),
+            });
+        }
+    });
+
+
+channel2
+    .here((users) => {
+        console.log("subscribed");
+        console.log({ users });
+        // Afegir la classe online als usuaris que estan connectats
+        users.forEach((user) => {
+            $(`#status${user.id}`).html("Online");
+        });
+    })
+    .joining((user) => {
+        console.log("joining", user);
+        $(`#status${user.id}`).html("Online");
+    })
+    .listenForWhisper('typing', (e) => {
+        if (e.receiver_id == userId && e.user_id == receiver.value) {
+            if (e.typing) $('#typing').show();
+            else $('#typing').hide();
+        }
+    })
+    .leaving((user) => {
+        console.log("leaving", user);
+        $(`#status${user.id}`).html("Offline");
+    });
+
+
 
 
 /**
@@ -123,6 +178,8 @@ function seleccionarUsuari(e) {
     if (receiver.value == userId) {
         receiver.value = 0;
         $(chat).html("");
+        $('#chat-user-name').text("");
+        $('#typing').hide();
         return;
     }
 
@@ -131,6 +188,10 @@ function seleccionarUsuari(e) {
 
     // Setejar el valor del receiver input amb l'id del user clicat
     $(receiver).val(userId);
+
+    // Mostrar el nom de l'usuari al xat
+    $('#chat-user-name').text(username);
+    $('#typing').hide();
 
     // Esborrar tots els missatges del xat
     $(chat).html("");
@@ -357,9 +418,14 @@ function mostrarError(error) {
     return errorDiv;
 }
 
-function mostrarErrors(errors, $domElement){
+/**
+ * Funció per mostrar tots els errors dins d'un objecte
+ * @param {object} errors Objecte amb els errors
+ * @param {jQuery} $Element Element on mostrar els errors
+ */
+function mostrarErrors(errors, $Element) {
     for (const error in errors) {
-        $domElement.append(mostrarError(errors[error]));
+        $Element.append(mostrarError(errors[error]));
         chat.scrollTop = chat.scrollHeight;
     }
 }

@@ -28,10 +28,39 @@
             <div class="d-flex align-items-center">
 
                 @auth
-                
-                <button class="btn btn-dark border border-white position-relative" data-bs-toggle="offcanvas" href="#offcanvasAddFriend" role="button" aria-controls="offcanvasAddFriend">
-                    <i class="bi bi-person-plus"></i>
-                </button>
+
+
+                <!-- Dropdown dels usuaris no amics amb botons per afegir amic i visitar perfil-->
+                <div class="dropdown-center" id="dropdownAddFriend" >
+                    <button class="btn btn-dark border border-white dropdown position-relative" data-bs-toggle="dropdown" href="#dropdownAddFriend" role="button" aria-expanded="false" aria-controls="dropdownAddFriend">
+                        <i class="bi bi-person-plus"></i>
+                    </button>
+                    <ul class="dropdown-menu overflow-auto" aria-labelledby="dropdownMenuButton">
+                        @foreach($notFriends as $user)
+                        <li>
+                            <div class="dropdown-item">
+                                <div class="d-flex justify-content-between ">
+                                    <div class="d-flex align-items-center">
+                                        <img class="rounded-circle" src="{{$user->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
+                                        <div class="ms-2">
+                                            <div class="fw-bold">{{$user->username}}</div>
+                                            <div>{{$user->email}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <form method="POST">
+                                            @csrf
+                                            <input type="hidden" name="friendId" value="{{$user->id}}">
+                                            <button class="btn btn-dark border border-white" type="submit">Afegir amic</button>
+                                        </form>
+                                        <a class="btn btn-dark border border-white">Visitar perfil</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
 
                 <button class="btn btn-dark border ms-3 border-white position-relative" data-bs-toggle="offcanvas" href="#offcanvasChat" role="button" aria-controls="offcanvasChat">
                     @if($totalUnreadMessages == 0)

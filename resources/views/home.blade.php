@@ -49,7 +49,7 @@
                                             <img class="rounded-circle" src="{{$friend->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
                                             <div class="card-text">
                                                 <div class="user-name">{{ $friend->username }}</div>
-                                                <div class="user-status">Online</div>
+                                                <div id="status{{$friend->id}}" class="user-status">Offline</div>
                                             </div>
                                         </div>
                                         @if($friend->unreadMessages > 0)
@@ -76,14 +76,19 @@
                 <div class="card mb-5">
                     <div class="card-header">
                         <h4>Xat</h4>
+                        <div class="row d-block">
+                                <span id="chat-user-name" class="text-muted p-0"></span>
+                                <span id="typing" class="text-muted p-0" style="display: none;">...escribint<span>
+                          
+                        </div>
                     </div>
                     <div id="chat-user" class="card-body chat-list  overflow-auto ">
-                    
+
                     </div>
                     <div class="card-footer pe-5">
                         <form id='chatForm' method="post">
                             <div class="input-group">
-                                <input type="text" name="message" class="form-control" placeholder="Escriu el teu missatge aquí...">
+                                <input type="text" id="message" name="message" class="form-control" placeholder="Escriu el teu missatge aquí...">
                                 <input type="hidden" name="receiver" id="receiver" value="0">
                                 <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
                             </div>

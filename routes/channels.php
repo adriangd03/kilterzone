@@ -27,3 +27,7 @@ Broadcast::channel('presence.ChatMessage.{id}', function ($user, $id) {
     }
     return false;
 });
+
+Broadcast::channel('presence.UsersOnline', function ($user) {
+    return $user;
+});

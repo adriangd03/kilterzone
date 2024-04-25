@@ -2,10 +2,13 @@
 - Acabar wireframe
 - Mockup
 - Millorar disseny
-- mensajes de error - Creo yo q ya estaría
 - Afegir amics
+    - Millorar disseny notificació
+- Treure amics
 - Configuració
 - Rutes/Perfil
+- Busqueda de rutas y usuarios
+    - Mejorar el diseño del dropdown y añadir busqueda de usuarios
 
 
 

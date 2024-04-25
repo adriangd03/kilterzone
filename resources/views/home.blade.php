@@ -15,6 +15,18 @@
 @endif
 
 
+<!-- Div where we will show the toats showing error or success messages to the user -->
+<div aria-live="polite" aria-atomic="true" class="position-relative m-5">
+    <!-- Position it: -->
+    <!-- - `.toast-container` for spacing between toasts -->
+    <!-- - `top-0` & `end-0` to position the toasts in the upper right corner -->
+    <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+    <div id="divToasts" class="toast-container bottom-5 start-0 p-3">
+
+        <!-- Then put toasts within -->
+
+    </div>
+</div>
 
 
 
@@ -39,10 +51,10 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Usuaris</h4>
+                                <h4>Amics</h4>
                             </div>
                             <div class="card-body h-100 overflow-auto mh-100">
-                                <div id="users" class="users-list row mh-100">
+                                <div id="amics" class="users-list row mh-100">
                                     @foreach($friends as $friend)
                                     <div class="user col-3 p-2 justify-content-center position-relative text-center" id="{{ $friend->id }}">
                                         <div class="user-info">
@@ -75,11 +87,11 @@
 
                 <div class="card mb-5">
                     <div class="card-header">
-                        <h4>Xat</h4>
                         <div class="row d-block">
-                                <span id="chat-user-name" class="text-muted p-0"></span>
-                                <span id="typing" class="text-muted p-0" style="display: none;">...escribint<span>
-                          
+                            <span>Xat</span>
+                            <span id="chat-user-name" class="text-muted p-0"></span>
+                            <span id="typing" class="text-muted p-0" style="display: none;">...escribint<span>
+
                         </div>
                     </div>
                     <div id="chat-user" class="card-body chat-list  overflow-auto ">

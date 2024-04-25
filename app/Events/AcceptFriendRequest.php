@@ -11,23 +11,19 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 
-class ChatMessage implements ShouldBroadcast
+class AcceptFriendRequest implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private string $message = '';
+    private User $friend;
     private User $user;
-    private User $receiver;
-
 
     /**
      * Create a new event instance.
      */
-    public function __construct( string $message, User $user, User $receiver)
-    {
-        $this->message = $message;
+    public function __construct(User $friend, User $user){
+        $this->friend = $friend;
         $this->user = $user;
-        $this->receiver = $receiver;
     }
 
     /**
@@ -38,22 +34,19 @@ class ChatMessage implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('presence.ChatMessage.'.$this->receiver->id),
+            new PresenceChannel('presence.ChatMessage.'.$this->friend->id),
         ];
     }
+
 
     public function broadcastWith(): array
     {
         return [
-            'message' => $this->message,
             'user' => $this->user->only(['username', 'avatar', 'id']),
-            'receiver' => $this->receiver->only(['username', 'avatar']),
         ];
     }
 
     public function broadcastAs() {
-        return 'ChatMessage';
+        return 'AcceptFriendRequest';
       }
-
-
 }

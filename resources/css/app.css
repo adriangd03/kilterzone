@@ -7,9 +7,13 @@
 }
 
 .chat-list {
-    height: 60vh;
-    max-height: 60vh;
+    height: 50vh;
+    max-height: 50vh;
     overflow-y: auto;
+}
+
+#users-dropdown{
+    min-width:  30vw;
 }
 
 .user-selected {

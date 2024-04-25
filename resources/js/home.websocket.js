@@ -1,6 +1,7 @@
 // Path: resources/js/home.websocket.js
 
 
+
 // Constant del formulari de missatges del xat
 const form = document.getElementById("chatForm");
 // Constant del xat
@@ -17,9 +18,11 @@ const receiver = document.getElementById("receiver");
 receiver.value = 0;
 // Constant del offcanvas del xat
 const offCanvas = document.getElementById("offcanvasChat");
+// Constant del div de toasts
+const divToasts = document.getElementById("divToasts");
 // Constant del canal de xat
 const channel = Echo.join(`presence.ChatMessage.${userId}`);
-// Constant del canal per els usuaris online, per saber si estan escrivint i per el enviament de solicituds d'amistat
+// Constant del canal per els usuaris online, per saber si estan escrivint i per el enviament de Sol·icituds d'amistat
 const channel2 = Echo.join('presence.UsersOnline');
 // Constant de missatges per guardar els missatges carregats
 const messages = {};
@@ -95,6 +98,21 @@ $('#message').on('keyup', (e) => {
     });
 });
 
+// Listener del dropdown per evitar que es tanqui al clicar dins
+$('#users-dropdown').on('click', (e) => {
+    e.stopPropagation();
+});
+
+// Listener del boto de sol·licitud d'amistat
+$('[name="formSolAmic"]').on('submit', enviarSolAmic);
+
+// Listener del boto de acceptar sol·licitud d'amistat
+$('[name="formAcceptarSolAmic"]').on('submit', acceptarSolAmic);
+
+// Listener del boto de rebutjar sol·licitud d'amistat
+$('[name="formRebutjarSolAmic"]').on('submit', rebutjarSolAmic);
+
+
 channel
     .here((users) => {
         console.log({ users });
@@ -126,7 +144,29 @@ channel
                 created_at: new Date(),
             });
         }
-    });
+    })
+    .listen(".SendFriendRequest", (event) => {
+        if (parseInt($('[name="SolAmicsBadge"]').html()) == 0) $('#solAmics').html('');
+        $('[name="SolAmicsBadge"]').html(parseInt($('[name="SolAmicsBadge"]').html()) + 1);
+        $('[name="SolAmicsBadge"]').show();
+
+        mostrarSolicitud(event.user);
+    }
+    )
+    .listen(".AcceptFriendRequest", (event) => {
+        $(`#divNotFriend-${event.user.id}`).remove();
+        afegirAmic(event.user);
+        $(`#solAmic-${event.user.id}`).remove();
+        $('[name="SolAmicsBadge"]').html(parseInt($('[name="SolAmicsBadge"]').html()) - 1);
+        if ($('[name="SolAmicsBadge"]').html() == 0) {
+            $('[name="SolAmicsBadge"]').hide();
+            $("#solAmics").html('<div class="text-center fw-bold">No hi ha sol·licituds de amistat</div>');
+        }
+        console.log("event", event);
+        mostrarToast("Sol·licitud acceptada", "success");
+    })
+
+    ;
 
 
 channel2
@@ -151,14 +191,16 @@ channel2
     .leaving((user) => {
         console.log("leaving", user);
         $(`#status${user.id}`).html("Offline");
-    });
+    })
+
+    ;
 
 
 
 
 /**
  * 
- * @param {event} e Event del click
+ * @param {object} e Event del click
  * @returns returns quan es fa clic per tancar el chat
  */
 function seleccionarUsuari(e) {
@@ -207,7 +249,6 @@ function seleccionarUsuari(e) {
         grabUserMessages(userId, userAvatar, username);
     }
 }
-
 
 /**
  * Funció per mostrar els missatges
@@ -424,8 +465,181 @@ function mostrarError(error) {
  * @param {jQuery} $Element Element on mostrar els errors
  */
 function mostrarErrors(errors, $Element) {
+    if (typeof errors === "string") {
+        $Element.append(mostrarError(errors));
+        chat.scrollTop = chat.scrollHeight;
+        return;
+    }
+
     for (const error in errors) {
         $Element.append(mostrarError(errors[error]));
         chat.scrollTop = chat.scrollHeight;
     }
+
+}
+
+/**
+ *  Funció per mostrar tots els errors amb toasts
+ * @param {object} errors Objecte amb els errors
+ * @returns 
+ */
+function mostrarErrorsToasts(errors) {
+    if (typeof errors === "string") {
+        mostrarToast(errors, "danger");
+        console.log(errors);
+        return;
+    }
+
+    for (const error in errors) {
+        mostrarToast(errors[error], "danger");
+        console.log(errors[error]);
+    }
+}
+
+/**
+ * Funció per mostrar un toast
+ * @param {string} message Missatge del toast 
+ * @param {string} type Tipus del toast
+ */
+function mostrarToast(message, type) {
+    var $div = $('<div>', { class: `toast show align-items-center text-white bg-primary border-0 bg-${type}`, role: "alert", "aria-live": "assertive", "aria-atomic": "true"});
+
+    $div.append($('<div>', { class: "toast-header" })
+    .append($('<strong>', { class: "me-auto" }).text("Notificació")
+    , $('<button>', { type: "button", class: "btn-close", "data-bs-dismiss": "toast" })));
+
+    $div.append($('<div>', { class: "toast-body" }).text(message));
+
+    $(divToasts).append($div);
+
+    // Esborrar el toast després de 5 segons
+    setTimeout(() => {
+        $div.remove();
+    }, 5000);
+
+}
+
+
+/**
+ * Funció per enviar la sol·licitud d'amistat
+ * @param {object} e Event del formulari 
+ */
+function enviarSolAmic(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    axios
+        .post("enviarSolicitudAmic", formData)
+        .then((response) => {
+            console.log(response);
+            $(e.target).find("button").attr("disabled", true);
+            $(e.target).find("button").html("Sol·icitud enviada");
+            mostrarToast("Sol·icitud enviada", "success");
+        })
+        .catch((error) => {
+            console.error(error);
+            mostrarErrorsToasts(error.response.data.error);
+        });
+}
+
+/**
+ * Funció per acceptar la sol·licitud d'amistat
+ * @param {object} e Event del formulari 
+ */
+function acceptarSolAmic(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    axios
+        .post("acceptarSolicitudAmic", formData)
+        .then((response) => {
+            afegirAmic(response.data.user);
+            $(`#solAmic-${response.data.user.id}`).remove();
+            mostrarToast("Sol·icitud aceptada", "success");
+            $(`#divNotFriend-${response.data.user.id}`).remove();
+            $(`#solAmics-${response.data.user.id}`).remove();
+            $('[name="SolAmicsBadge"]').html(parseInt($('[name="SolAmicsBadge"]').html()) - 1);
+            if ($('[name="SolAmicsBadge"]').html() == 0){
+                $('[name="SolAmicsBadge"]').hide();
+                $('#solAmics').html('<div class="text-center fw-bold">No hi ha sol·licituds de amistat</div>');
+            } 
+        })
+        .catch((error) => {
+
+            mostrarErrorsToasts(error.response.data.error);
+        });
+}
+
+/**
+ * Funció per rebutjar la sol·licitud d'amistat
+ * @param {object} e Event del formulari
+ */
+function rebutjarSolAmic(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    axios
+        .post("rebutjarSolicitudAmic", formData)
+        .then((response) => {
+            $(e.target).closest(".dropdown-item").remove();
+            $('[name="SolAmicsBadge"]').html(parseInt($('[name="SolAmicsBadge"]').html()) - 1);
+            if ($('[name="SolAmicsBadge"]').html() == 0) {
+                $('[name="SolAmicsBadge"]').hide();
+                $('#solAmics').html('<div class="text-center fw-bold">No hi ha sol·licituds de amistat</div>');
+            }
+            mostrarToast("sol·licitud rebutjada", "success");
+        })
+        .catch((error) => {
+            console.error(error);
+            mostrarErrorsToasts(error.response.data.error);
+        });
+}
+
+/**
+ * Funció per mostrar la sol·licitud d'amistat
+ * @param {*} user Informació de l'usuari que envia la sol·licitud
+ */
+function mostrarSolicitud(user) {
+    var $div = $('<div>', { class: "dropdown-item", id: `solAmic-${user.id}`});
+    let form = $('<form>', { name: "formAcceptarSolAmic", action: "acceptarSolicitudAmic", method: "POST" });
+    form.append($('<input>', { type: "hidden", name: "friend_id", value: user.id }));
+    form.append($('<button>', { class: "btn btn-primary border border-white", type: "submit" }).text("Acceptar"));
+
+    let form2 = $('<form>', { name: "formRebutjarSolAmic", action: "rebutjarSolicitudAmic", method: "POST" });
+    form2.append($('<input>', { type: "hidden", name: "friend_id", value: user.id }));
+    form2.append($('<button>', { class: "btn btn-danger border border-white", type: "submit" }).text("Rebutjar"));
+
+    $div.append($('<div>', { class: "d-flex justify-content-center" })
+        .append($('<img>', { class: "rounded-circle", src: `${user.avatar}`, alt: "avatar 1", style: "width: 45px; height: 100%;" })
+            , $('<div>', { class: "ms-2" })
+                .append($('<div>', { class: 'fw-bold' }).text(user.username))
+            , form, form2));
+
+    // $div.append($('<div>', {class:"d-flex align-items-center"}).append(form, form2));
+
+    form.on('submit', acceptarSolAmic);
+    form2.on('submit', rebutjarSolAmic);
+
+    $('#solAmics').append($div);
+
+}
+
+/**
+ * Funció per afegir un usuari a la llista de amics
+ * @param {object} user Informació de l'usuari
+ */
+function afegirAmic(user) {
+    var $div = $('<div>', { class: "user col-3 p-2 justify-content-center position-relative text-center", id: user.id });
+    $div.append($('<div>', { class: "user-info" }).append($('<img>', { class: "rounded-circle", src: user.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }), $('<div>', { class: "card-text" }).append($('<div>', { class: "user-name" }).text(user.username), $('<div>', { class: "user-status", id: `status${user.id}` }).text("Online"))));
+
+    var $badge = $('<span>', { class: "badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle", id: `b-${user.id}` });
+    $badge.hide();
+    $badge.html(0);
+    $badge.append('<span>', { class: "visually-hidden" }).text("unread messages");
+    $div.append($badge);
+    $div.on('click', seleccionarUsuari);
+    $('#amics').append($div);
+
+
+
 }

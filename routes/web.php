@@ -47,3 +47,9 @@ Route::post('/api/send-message-to-client', [UserController::class, 'sendMessageT
 Route::post('/api/get-user-messages', [UserController::class, 'getUserMessages'])->name('get-user-messages')->middleware('auth');
 
 Route::post('/api/marcar-missatges-llegits', [UserController::class, 'marcarMissatgesComLLegits'])->name('marcar-missatges-llegits')->middleware('auth');
+
+Route::post('enviarSolicitudAmic', [UserController::class, 'enviarSolicitudAmic'])->name('enviarSolicitudAmic')->middleware('auth');
+
+Route::post('acceptarSolicitudAmic', [UserController::class, 'acceptarSolicitudAmic'])->name('acceptarSolicitudAmic')->middleware('auth');
+
+Route::post('rebutjarSolicitudAmic', [UserController::class, 'rebutjarSolicitudAmic'])->name('rebutjarSolicitudAmic')->middleware('auth');

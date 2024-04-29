@@ -65,7 +65,6 @@ class User extends Authenticatable implements CanResetPassword
             return $username;
     }
 
-    
     /**
      * Envia una notificació de restabliment de contrasenya
      * @param string $token Token de restabliment de contrasenya
@@ -75,6 +74,37 @@ class User extends Authenticatable implements CanResetPassword
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+    
+    /**
+     * Funció per obtenir un usuari a partir de la seva id
+     * @param int $id Id de l'usuari
+     * @return User Usuari amb la id especificada
+     */
+    public static function getUserById($id)
+    {
+        return User::where('id', $id)->first();
+    }
+
+    /**
+     * Funció per obtenir un usuari a partir del seu nom d'usuari
+     * @param string $username Nom d'usuari
+     * @return User Usuari amb el nom d'usuari especificat
+     */
+    public static function getUserByUsername($username)
+    {
+        return User::where('username', $username)->first();
+    }
+
+    /**
+     * Funció per obtenir un usuari a partir del seu correu electrònic
+     * @param string $email Correu electrònic
+     * @return User Usuari amb el correu electrònic especificat
+     */
+    public static function getUserByEmail($email)
+    {
+        return User::where('email', $email)->first();
+    }
+    
 
     
 }

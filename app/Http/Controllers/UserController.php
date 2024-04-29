@@ -32,38 +32,23 @@ class UserController extends Controller
             if (!Auth::check()) {
                 return view('home');
             }
-            // Agafem tots les relacions d'amistat acceptades on l'usuari autenticat estigui implicat
-            $user_friends = User_friend::where(function ($query) {
-                $query->where('user_id', Auth::user()->id)
-                    ->orWhere('friend_id', Auth::user()->id);
-            })->where('accepted', 1)->get();
+            // Agafem tots els amics de l'usuari autenticat
+            $friends = User_friend::getFriends(Auth::user()->id);
 
-            // Mapejem els usuaris amics
-            $friends = $user_friends->map(function ($user_friends) {
-                if ((int) $user_friends->user_id == (int) Auth::user()->id) {
-                    return User::where('id', $user_friends->friend_id)->first();
-                } else {
-                    return User::where('id', $user_friends->user_id)->first();
-                }
-            });
-
-            // Treiem els usuaris repetits
-            $friends = $friends->unique();
-
-            // Agafem les solicituds de amistat pendents
-            $friendRequests = User_friend::where('friend_id', Auth::user()->id)->where('accepted', 0)->get();
+            // Agafem les solicituds de amistat pendents de l'usuari autenticat
+            $friendRequests = User_friend::getFriendRequests(Auth::user()->id);
 
             // Agafar el avatar i el nom d'usuari dels usuaris que han enviat una sol·licitud d'amistat
             $friendRequests = $friendRequests->map(function ($friendRequest) {
-                $friendRequest->user = User::where('id', $friendRequest->user_id)->first();
+                $friendRequest->user = User::getUserById($friendRequest->user_id);
                 return $friendRequest;
             });
 
             // Agafem les solicituds de amistat enviades
-            $sentFriendRequests = User_friend::where('user_id', Auth::user()->id)->where('accepted', 0)->get();
+            $sentFriendRequests = User_friend::getFriendRequestsSent(Auth::user()->id);
 
             // Agafem el nombre de missatges no llegits
-            $unreadMessages = User_message::where('receiver_id', Auth::user()->id)->where('read', 0)->get();
+            $unreadMessages = User_message::getUserMessagesReceivedUnread(Auth::user()->id);
 
             // Afegeix el nombre de missatges no llegits a cada usuari
             $friends = $friends->map(function ($friend) use ($unreadMessages) {
@@ -72,7 +57,7 @@ class UserController extends Controller
             });
 
             // Agafem tots els usuaris que no siguin amics
-            $notFriends = User::get()->diff($friends)->where('id', '!=', Auth::user()->id);
+            $notFriends = User_friend::getNotFriends(Auth::user()->id);
 
             // Afegim als usuaris no amics les sol·licituds d'amistat enviades
             $notFriends = $notFriends->map(function ($notFriend) use ($sentFriendRequests) {
@@ -92,8 +77,9 @@ class UserController extends Controller
             // Retornem la vista de la pàgina principal
             return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' . $e);
-            return view('home', ['friends' => []]);
+            // Si hi ha algun error en el procés de mostrar la pàgina principal retornem un error
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard');
+            return view('home', compact('friends',  'notFriends', 'friendRequests', 'totalFriendRequests', 'totalUnreadMessages',));
         }
     }
 
@@ -119,12 +105,14 @@ class UserController extends Controller
             );
 
             // Comprovem si l'usuari ja ha enviat una sol·licitud d'amistat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $request->friend_id)->first();
-
-            // Comprovem si la relació ja existeix
-            if ($friend) {
+            if (User_friend::hasSentFriendRequest(Auth::user()->id, $request->friend_id)) {
                 // Si ja existeix la relació retornem un error
                 return response()->json(['error' => 'Ja has enviat una sol·licitud d\'amistat a aquest usuari'], 403);
+            }
+            // Comprovem si els dos usuaris ja són amics
+            if (User_friend::areFriends(Auth::user()->id, $request->friend_id)) {
+                // Si ja existeix la relació retornem un error
+                return response()->json(['error' => 'Ja sou amics'], 403);
             }
 
             // Creem una nova relació d'amistat
@@ -135,16 +123,14 @@ class UserController extends Controller
 
 
             // Enviem l'esdeveniment de sol·licitud d'amistat
-            event(new SendFriendRequest(Auth::user(), User::where('id', $request->friend_id)->first()));
+            event(new SendFriendRequest(Auth::user(), User::getUserById($request->friend_id)));
 
             // Retornem un missatge de confirmació
             return response()->json(['message' => 'S\'ha enviat la sol·licitud d\'amistat']);
-
-
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard' ], 500);
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard'], 500);
         }
     }
 
@@ -172,10 +158,16 @@ class UserController extends Controller
             );
 
             // Busquem la relació d'amistat
-            $friend = User_friend::where('user_id', $request->friend_id)->where('friend_id', Auth::user()->id)->first();
+            $friend = User_friend::getFriendRequest($request->friend_id, Auth::user()->id);
 
             // Comprovem si la relació existeix
             if ($friend) {
+                // Comprovem si els usuaris ja són amics
+                $friendship = User_friend::areFriends(Auth::user()->id, $request->friend_id);
+                if ($friendship) {
+                    // Si ja existeix la relació retornem un error
+                    return response()->json(['error' => 'Ja sou amics'], 403);
+                }
                 // Acceptem la sol·licitud d'amistat
                 $friend->accepted = 1;
                 $friend->save();
@@ -184,7 +176,7 @@ class UserController extends Controller
                 return response()->json(['error' => 'No s\'ha trobat la sol·licitud d\'amistat a acceptar'], 404);
             }
             // Comprovem si l'usuari han enviat anteriorment una sol·licitud d'amistat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $request->friend_id)->first();
+            $friend = User_friend::getFriendRequest(Auth::user()->id, $request->friend_id);
 
             // Comprovem si la relació existeix
             if ($friend) {
@@ -193,14 +185,14 @@ class UserController extends Controller
             }
 
             // Enviem l'esdeveniment d'acceptar sol·licitud d'amistat a l'usuari que ha enviat la sol·licitud
-            event(new AcceptFriendRequest(User::where('id', $request->friend_id)->first(), Auth::user()));
+            event(new AcceptFriendRequest(User::getUserById($request->friend_id), Auth::user()));
 
             // Retornem un missatge de confirmació
             return response()->json(['message' => 'S\'ha acceptat la sol·licitud d\'amistat', 'user' => User::where('id', $request->friend_id)->first()->only('id', 'username', 'avatar')]);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'acceptar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard' ], 500);
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'acceptar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard'], 500);
         }
     }
 
@@ -226,7 +218,7 @@ class UserController extends Controller
             );
 
             // Busquem la relació d'amistat
-            $friend = User_friend::where('user_id', $request->friend_id)->where('friend_id', Auth::user()->id)->where('accepted', 0)->first();
+            $friend = User_friend::getFriendRequest($request->friend_id, Auth::user()->id);
 
             // Comprovem si la relació existeix
             if ($friend) {
@@ -242,51 +234,11 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés de rebutjar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard' ], 500);
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés de rebutjar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard'], 500);
         }
     }
 
-    /**
-     * Funció per a cancelar una sol·licitud d'amistat
-     * @param Request $request Dades de la petició
-     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina principal o a la pàgina anterior
-     * @throws \Exception Si hi ha algun error en el procés de cancelar la sol·licitud d'amistat
-     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
-     */
-    function cancelarSolicitudAmic(Request $request)
-    {
-        try {
-            // Validem les dades de la petició
-            $request->validate(
-                [
-                    'friend_id' => 'required|exists:users,id',
-                ],
-                [
-                    'friend_id.required' => "No s'ha trobat l'amic a cancelar",
-                    'friend_id.exists' => 'Aquest usuari no existeix',
-                ]
-            );
 
-            // Busquem la relació d'amistat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $request->friend_id)->first();
-
-            // Comprovem si la relació existeix
-            if ($friend) {
-                // Si existeix la esborrem
-                $friend->delete();
-            } else {
-                // Si no existeix la relació retornem un error
-                return redirect()->back()->with('error', 'No s\'ha trobat la sol·licitud d\'amistat a cancelar');
-            }
-
-            // Retornem un missatge de confirmació
-            return redirect()->back()->with('success', 'S\'ha cancelat la sol·licitud d\'amistat');
-        } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'cancelarSolicitudAmic')->withInput();
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés de cancelar la sol·licitud d\'amistat, tornar a provar o prova-ho més tard');
-        }
-    }
 
     /**
      * Funció per a iniciar sessió
@@ -337,16 +289,14 @@ class UserController extends Controller
             // Comprovem si el nom de usuari o correu electrònic existeixen
             if (isset($credentials['email'])) {
                 // Comprovem si l'usuari existeix
-                if (User::where('email', $credentials['email'])->doesntExist()) {
+                if (User::getUserByEmail($credentials['email'])->doesntExist()) {
                     // Si no existeix retornem un error
                     return redirect()->back()->withErrors(['email_username' => 'Aquest correu electrònic no està registrat',], 'login')->withInput();
                 }
-            } else {
-                // Comprovem si l'usuari existeix
-                if (User::where('username', $credentials['username'])->doesntExist()) {
-                    // Si no existeix retornem un error
-                    return redirect()->back()->withErrors(['email_username' => 'Aquest nom d\'usuari no està registrat',], 'login')->withInput();
-                }
+            // Comprovem si l'usuari existeix per nom d'usuari
+            } else if (User::getUserByUsername($credentials['username'])->doesntExist()) {
+                // Si no existeix retornem un error
+                return redirect()->back()->withErrors(['email_username' => 'Aquest nom d\'usuari no està registrat',], 'login')->withInput();
             }
             // Si les credencials són incorrectes retornem un error
             return redirect()->back()->withErrors(['password' => 'Constrasenya incorrecta',], 'login')->withInput();
@@ -355,7 +305,7 @@ class UserController extends Controller
             return redirect()->back()->withErrors($e->validator->getMessageBag(), 'login')->withInput();
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés d'inici de sessió retornem un error
-            return redirect()->back()->withErrors(['error' => "Hi ha ocurregut un problema en el procés d'inici de sessió, tornar a provar o prova-ho més tard" ], 'login')->withInput();
+            return redirect()->back()->withErrors(['error' => "Hi ha ocurregut un problema en el procés d'inici de sessió, tornar a provar o prova-ho més tard"], 'login')->withInput();
         }
     }
 
@@ -478,7 +428,7 @@ class UserController extends Controller
                     'email.exists' => 'Aquest correu electrònic no està registrat',
                 ]
             );
-            $user = User::where('email', $request->email)->first();
+            $user = User::getUserByEmail($request->email)->first();
 
             if (!$user->password) {
                 return redirect()->back()->with('error', 'Aquest usuari no té permisos per a restablir la contrasenya');
@@ -553,7 +503,7 @@ class UserController extends Controller
                 $user->save();
             });
 
-            $user = User::where('email', $request->email)->first();
+            $user = User::getUserByEmail($request->email)->first();
 
             // Comprovem si s'ha restaurat la contrasenya correctament
             if ($status == Password::PASSWORD_RESET) {
@@ -605,16 +555,11 @@ class UserController extends Controller
                 ]
             );
             // Busquem l'usuari receptor
-            $receiver = User::where('id', $request->receiver)->first();
-
-            // Comprovem si l'usuari receptor és amic de l'usuari autenticat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function (Builder $query) use ($receiver) {
-                $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
-            })->first();
+            $receiver = User::getUserById($request->receiver);
 
             // Si no és amic retornem un error
-            if (!$friend) {
-                return response()->json(['error' => 'No pots enviar missatges a aquest usuari'], 403);
+            if (User_friend::areFriends(Auth::user()->id, $receiver->id) == false){
+                return response()->json(['error' => 'No pots enviar missatges a aquest usuari, perquè no sou amics'], 403);
             }
 
             // Enviem el missatge
@@ -632,7 +577,7 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar el missatge, tornar a provar o prova-ho més tard' ], 500);
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'enviar el missatge, tornar a provar o prova-ho més tard'], 500);
         }
     }
 
@@ -656,37 +601,25 @@ class UserController extends Controller
                 ]
             );
 
-            // Busquem l'usuari receptor
-            $receiver = User::where('id', $request->userId)->first();
-
-            // Comprovem si l'usuari receptor és amic de l'usuari autenticat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function (Builder $query) use ($receiver) {
-                $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
-            })->first();
+            // Busquem l'usuari amic
+            $friend = User::getUserById($request->userId);
 
             // Si no és amic retornem un error
-            if (!$friend) {
+            if (User_friend::areFriends(Auth::user()->id, $friend->id) == false){
                 return response()->json(['error' => 'No pots veure els missatges d\'aquest usuari'], 403);
             }
-
             // Busquem els missatges de l'usuari amb l'usuari receptor
-            $messages = User_message::where(function ($query) use ($receiver) {
-                $query->where('user_id', Auth::user()->id)
-                    ->where('receiver_id', $receiver->id);
-            })->orWhere(function ($query) use ($receiver) {
-                $query->where('user_id', $receiver->id)
-                    ->where('receiver_id', Auth::user()->id);
-            })->get();
-
+            $messages = User_message::getConversation(Auth::user()->id, $friend->id);
+            
             // Marquem els missatges com a llegits
-            User_message::where('user_id', $receiver->id)->where('receiver_id', Auth::user()->id)->update(['read' => 1]);
+            User_message::markAsRead(Auth::user()->id, $friend->id);
 
             // Retornem els missatges
             return response()->json(['messages' => $messages]);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'agafar els missatges, tornar a provar o prova-ho més tard' ], 500);
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'agafar els missatges, tornar a provar o prova-ho més tard'], 500);
         }
     }
 
@@ -711,27 +644,23 @@ class UserController extends Controller
             );
 
             // Busquem l'usuari receptor
-            $receiver = User::where('id', $request->userId)->first();
+            $friend = User::getUserById($request->userId);
 
-            // Comprovem si l'usuari receptor és amic de l'usuari autenticat
-            $friend = User_friend::where('user_id', Auth::user()->id)->where('friend_id', $receiver->id)->where('accepted', 1)->orWhere(function (Builder $query) use ($receiver) {
-                $query->where('user_id', $receiver->id)->where('friend_id', Auth::user()->id)->where('accepted', 1);
-            })->first();
-
-            // Si no és amic retornem un error
-            if (!$friend) {
+            // Comprovem si els usuari són amics
+            if (User_friend::areFriends(Auth::user()->id, $friend->id) == false){
+                // Si no són amics retornem un error
                 return response()->json(['error' => 'No pots marcar els missatges com a llegits d\'aquest usuari'], 403);
             }
 
             // Marquem els missatges com a llegits
-            User_message::where('user_id', $receiver->id)->where('receiver_id', Auth::user()->id)->update(['read' => 1]);
+            User_message::markAsRead(Auth::user()->id, $friend->id);
 
             // Retornem un missatge de confirmació
             return response()->json(['message' => 'Missatges marcats com a llegits']);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés de marcar els missatges com a llegits, tornar a provar o prova-ho més tard' ], 500);
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés de marcar els missatges com a llegits, tornar a provar o prova-ho més tard'], 500);
         }
     }
 }

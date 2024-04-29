@@ -2,13 +2,20 @@
 - Acabar wireframe
 - Mockup
 - Millorar disseny
-- Afegir amics
-    - Millorar disseny notificació
-- Treure amics
+- Netejar i organitzar el codi
+- Perfil
+    - Usuari amic
+        - Treure amics
+    - Usuari no amic
+        - Bloquear a usuari
+    - Propi perfil
+        - Afegir descripció
+
 - Configuració
-- Rutes/Perfil
+- Rutes
 - Busqueda de rutas y usuarios
     - Mejorar el diseño del dropdown y añadir busqueda de usuarios
+- Que hacer con los formularios si el javascript no funciona o algo.
 
 
 

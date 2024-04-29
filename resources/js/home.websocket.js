@@ -441,9 +441,9 @@ function sumarNotificacions() {
  * @param {int} userId id de l'usuari amic al que augmentar les notificacions
  */
 function sumarNotificacionsUser(userId) {
-    let friendBadge = document.getElementById("b-" + userId);
-    friendBadge.style.display = "block";
-    friendBadge.innerHTML = parseInt(friendBadge.innerHTML) + 1;
+    let $friendBagde = $(`#b-${userId}`);
+    $friendBagde.html(parseInt($friendBagde.html()) + 1);
+    $friendBagde.show();
     sumarNotificacions();
 }
 
@@ -635,7 +635,6 @@ function afegirAmic(user) {
     var $badge = $('<span>', { class: "badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle", id: `b-${user.id}` });
     $badge.hide();
     $badge.html(0);
-    $badge.append('<span>', { class: "visually-hidden" }).text("unread messages");
     $div.append($badge);
     $div.on('click', seleccionarUsuari);
     $('#amics').append($div);

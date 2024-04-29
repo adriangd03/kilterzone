@@ -35,7 +35,7 @@
                     <button class="btn btn-dark border border-white dropdown position-relative" data-bs-toggle="dropdown" href="#dropdownAddFriend" role="button" aria-expanded="false" aria-controls="dropdownAddFriend">
                         <i class="bi bi-person-plus"></i>
 
-                        <span name="SolAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if ($totalFriendRequests==0) style="display: none;" @endif>
+                        <span name="SolAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if($totalFriendRequests == 0) style="display: none;" @endif>
                             {{ $totalFriendRequests }}
                             <span class="visually-hidden">Sol·licituds d'amistat</span>
                         </span>

@@ -84,10 +84,10 @@ class UserController extends Controller
     }
 
     /**
-     * Funció per a acceptar una sol·licitud d'amistat
+     * Funció per enviar una sol·licitud d'amistat
      * @param Request $request Dades de la petició
      * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina principal o a la pàgina anterior
-     * @throws \Exception Si hi ha algun error en el procés d'acceptar la sol·licitud d'amistat
+     * @throws \Exception Si hi ha algun error en el procés d'enviar la sol·licitud d'amistat
      */
     function enviarSolicitudAmic(Request $request)
     {
@@ -173,7 +173,7 @@ class UserController extends Controller
                 $friend->save();
             } else {
                 // Si no existeix la relació retornem un error
-                return response()->json(['error' => 'No s\'ha trobat la sol·licitud d\'amistat a acceptar'], 404);
+                return response()->json(['error' => 'No s\'ha trobat la sol·licitud d\'amistat a acceptar'], 403);
             }
             // Comprovem si l'usuari han enviat anteriorment una sol·licitud d'amistat
             $friend = User_friend::getFriendRequest(Auth::user()->id, $request->friend_id);
@@ -593,7 +593,7 @@ class UserController extends Controller
         try {
             $request->validate(
                 [
-                    'userId' => 'required|exists:users,id',
+                    'friendId' => 'required|exists:users,id',
                 ],
                 [
                     'userId.required' => 'El camp receptor és obligatori',
@@ -602,11 +602,16 @@ class UserController extends Controller
             );
 
             // Busquem l'usuari amic
-            $friend = User::getUserById($request->userId);
+            $friend = User::getUserById($request->friendId);
+
+            // Comprovem que el amic no sigui l'usuari autenticat
+            if ($friend->id == Auth::user()->id){
+                return response()->json(['error' => 'No pots veure una conversació amb tu mateix'], 403);
+            }
 
             // Si no és amic retornem un error
-            if (User_friend::areFriends(Auth::user()->id, $friend->id) == false){
-                return response()->json(['error' => 'No pots veure els missatges d\'aquest usuari'], 403);
+            if (!User_friend::areFriends(Auth::user()->id, $friend->id)){
+                return response()->json(['error' => 'No pots veure la conversació amb aquest usuari perquè no sou amics'. $friend->id], 403);
             }
             // Busquem els missatges de l'usuari amb l'usuari receptor
             $messages = User_message::getConversation(Auth::user()->id, $friend->id);
@@ -635,16 +640,16 @@ class UserController extends Controller
         try {
             $request->validate(
                 [
-                    'userId' => 'required|exists:users,id',
+                    'friendId' => 'required|exists:users,id',
                 ],
                 [
-                    'userId.required' => 'El camp receptor és obligatori',
-                    'userId.exists' => 'Aquest receptor no existeix',
+                    'friendId.required' => 'El camp receptor és obligatori',
+                    'friendId.exists' => 'Aquest receptor no existeix',
                 ]
             );
 
             // Busquem l'usuari receptor
-            $friend = User::getUserById($request->userId);
+            $friend = User::getUserById($request->friendId);
 
             // Comprovem si els usuari són amics
             if (User_friend::areFriends(Auth::user()->id, $friend->id) == false){

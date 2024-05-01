@@ -56,11 +56,11 @@
                             <div class="card-body h-100 overflow-auto mh-100">
                                 <div id="amics" class="users-list row mh-100">
                                     @foreach($friends as $friend)
-                                    <div class="user col-3 p-2 justify-content-center position-relative text-center" id="{{ $friend->id }}">
+                                    <div class="friend col-3 p-2 justify-content-center position-relative text-center" id="{{ $friend->id }}">
                                         <div class="user-info">
                                             <img class="rounded-circle" src="{{$friend->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
                                             <div class="card-text">
-                                                <div class="user-name">{{ $friend->username }}</div>
+                                                <div class="friend-username">{{ $friend->username }}</div>
                                                 <div id="status{{$friend->id}}" class="user-status">Offline</div>
                                             </div>
                                         </div>

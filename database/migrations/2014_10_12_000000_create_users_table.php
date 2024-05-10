@@ -18,6 +18,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->string('avatar')->default(env('APP_URL') ."/storage/avatars/default.png");
+            $table->string('description')->nullable();
+            $table->string('introduction')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

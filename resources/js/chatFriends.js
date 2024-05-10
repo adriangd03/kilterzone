@@ -58,6 +58,11 @@ var chatFriends = $(function () {
     // Listener del boto de rebutjar sol·licitud d'amistat
     $('[name="formRebutjarSolAmic"]').on('submit', friends.rebutjarSolAmic);
 
+    // Listener del formulari de eliminar amic 
+    $('#formEliminarAmic').on('submit', friends.eliminarAmic);
+
+
+
 
     channel
         .here((users) => {
@@ -104,7 +109,21 @@ var chatFriends = $(function () {
             notificacions.restarSolAmics();
             console.log("event", event);
             toastAlerts.mostrarToast("success", "Sol·licitud aceptada", $(divToasts));
-        });
+
+            try {
+                $(`#divFormFriend${event.user.id}`).html('');
+                let form = friends.crearFormEliminarAmic(event.user.id);
+                $(`#divFormFriend${event.user.id}`).append(form);
+                $(`#totalAmics${event.user.id}`).html(parseInt($(`#totalAmics${event.user.id}`).html()) + 1);
+            } catch (err) {
+                console.log(err);
+            }
+        })
+        .listen('.RemoveFriend', (event) => {
+            friends.eliminarAmicHtml(event.user.id);
+            friends.mostrarNouUsuariNoAmic(event.user);
+        })
+        ;
 
     channel2
         .here((users) => {

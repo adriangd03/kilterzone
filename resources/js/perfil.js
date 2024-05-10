@@ -1,4 +1,4 @@
-// Path: resources/js/home.js
+// Path: resources/js/perfil.js
 import chatFriends from "./chatFriends";
 
 

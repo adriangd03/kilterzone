@@ -15,11 +15,15 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Events\SendFriendRequest;
 use App\Events\ChatMessage;
 use App\Events\AcceptFriendRequest;
+use App\Events\RemoveFriend;
 
 
 
 class UserController extends Controller
 {
+
+
+    
 
     /**
      * Funció per a mostrar la pàgina principal
@@ -30,58 +34,117 @@ class UserController extends Controller
         try {
             // Comprovem si l'usuari està autenticat i si no ho està retornem la vista de la pàgina principal
             if (!Auth::check()) {
-                return view('home');
+                $notFriends = User::getAll();
+                return view('home', compact('notFriends'));
             }
-            // Agafem tots els amics de l'usuari autenticat
-            $friends = User_friend::getFriends(Auth::user()->id);
+            
 
-            // Agafem les solicituds de amistat pendents de l'usuari autenticat
-            $friendRequests = User_friend::getFriendRequests(Auth::user()->id);
+            $chatData = User::getChatData();
+            $friends = $chatData['friends'];
+            $friendRequests = $chatData['friendRequests'];
+            $notFriends = $chatData['notFriends'];
+            $totalUnreadMessages = $chatData['totalUnreadMessages'];
+            $totalFriendRequests = $chatData['totalFriendRequests'];
 
-            // Agafar el avatar i el nom d'usuari dels usuaris que han enviat una sol·licitud d'amistat
-            $friendRequests = $friendRequests->map(function ($friendRequest) {
-                $friendRequest->user = User::getUserById($friendRequest->user_id);
-                return $friendRequest;
-            });
-
-            // Agafem les solicituds de amistat enviades
-            $sentFriendRequests = User_friend::getFriendRequestsSent(Auth::user()->id);
-
-            // Agafem el nombre de missatges no llegits
-            $unreadMessages = User_message::getUserMessagesReceivedUnread(Auth::user()->id);
-
-            // Afegeix el nombre de missatges no llegits a cada usuari
-            $friends = $friends->map(function ($friend) use ($unreadMessages) {
-                $friend->unreadMessages = $unreadMessages->where('user_id', $friend->id)->count();
-                return $friend;
-            });
-
-            // Agafem tots els usuaris que no siguin amics
-            $notFriends = User_friend::getNotFriends(Auth::user()->id);
-
-            // Afegim als usuaris no amics les sol·licituds d'amistat enviades
-            $notFriends = $notFriends->map(function ($notFriend) use ($sentFriendRequests) {
-                $sentFriendRequest = $sentFriendRequests->where('friend_id', $notFriend->id)->first();
-                if ($sentFriendRequest) {
-                    $notFriend->sentFriendRequest = true;
-                }
-                return $notFriend;
-            });
-
-            // Agafem el total de missatges no llegits
-            $totalUnreadMessages = $unreadMessages->count();
-
-            // Agafem el total de sol·licituds d'amistat pendents
-            $totalFriendRequests = $friendRequests->count();
 
             // Retornem la vista de la pàgina principal
             return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar la pàgina principal retornem un error
-            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard');
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' .$e);
             return view('home', compact('friends',  'notFriends', 'friendRequests', 'totalFriendRequests', 'totalUnreadMessages',));
         }
     }
+
+    
+
+    /**
+     * Funció per a mostrar el perfil d'un usuari
+     * @param int $id Id de l'usuari
+     * @return \Illuminate\Contracts\View\View Retorna la vista del perfil de l'usuari
+     */
+    public function perfil($id){
+        try {
+
+            if (!Auth::check()) {
+                $notFriends = User::getAll();
+                $user = User::getUserById($id);
+                $user->friends = User_friend::getFriends($user->id)->count();
+                return view('perfil', compact('notFriends', 'user'));
+            }
+
+            // Agafem l'usuari per id
+            $user = User::getUserById($id);
+
+            // Comprovem si l'usuari existeix
+            if (!$user) {
+                // Si l'usuari no existeix retornem un error
+                session()->flash('error', 'Aquest usuari no existeix');
+                return redirect()->route('home');
+            }
+
+            if($user->id == Auth::user()->id){
+                return redirect()->route('home');
+            }
+
+            $chatData = User::getChatData();
+
+            $friends = $chatData['friends'];
+            $friendRequests = $chatData['friendRequests'];
+            $notFriends = $chatData['notFriends'];
+            $totalUnreadMessages = $chatData['totalUnreadMessages'];
+            $totalFriendRequests = $chatData['totalFriendRequests'];
+
+            // Comprove si l'usuari ja és amic
+            $isFriend = User_friend::areFriends(Auth::user()->id, $id);
+
+            // Agafar el nombre d'amics de l'usuari
+            $user->friends = User_friend::getFriends($user->id)->count();
+
+            // Comprovem si el usuari ja li ha enviat una sol·licitud d'amistat
+            $user->sentFriendRequest = User_friend::hasSentFriendRequest(Auth::user()->id, $id);
+
+            // Retornem la vista del perfil de l'usuari
+            return view('perfil', compact('user', 'friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests', 'isFriend'));
+        } catch (\Exception $e) {
+            // Si hi ha algun error en el procés de mostrar el perfil de l'usuari retornem un error
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar el perfil de l\'usuari, tornar a provar o prova-ho més tard');
+            return redirect()->route('home');
+        }
+
+    }
+
+    /**
+     * Funció per a mostrar el perfil propi
+     * @return \Illuminate\Contracts\View\View Retorna la vista del perfil propi
+     */
+    public function perfilPropi()
+    {
+        try {
+            // Agafem l'usuari autenticat
+            $user = Auth::user();
+
+            $chatData = User::getChatData();
+
+            $friends = $chatData['friends'];
+            $friendRequests = $chatData['friendRequests'];
+            $notFriends = $chatData['notFriends'];
+            $totalUnreadMessages = $chatData['totalUnreadMessages'];
+            $totalFriendRequests = $chatData['totalFriendRequests'];
+
+            // Agafar el nombre d'amics de l'usuari
+            $user->friends = User_friend::getFriends($user->id)->count();
+
+            // Retornem la vista del perfil propi
+            return view('perfil_user', compact('user', 'friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
+        } catch (\Exception $e) {
+            // Si hi ha algun error en el procés de mostrar el perfil propi retornem un error
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar el perfil propi, tornar a provar o prova-ho més tard');
+            return redirect()->route('home');
+        }
+    }
+
+
 
     /**
      * Funció per enviar una sol·licitud d'amistat
@@ -238,6 +301,53 @@ class UserController extends Controller
         }
     }
 
+    function eliminarAmic(Request $request)
+    {
+        try {
+            // Validem les dades de la petició
+            $request->validate(
+                [
+                    'friend_id' => 'required|exists:users,id',
+                ],
+                [
+                    'friend_id.required' => "No s'ha trobat l'amic a eliminar",
+                    'friend_id.exists' => 'Aquest usuari no existeix',
+                ]
+            );
+
+            // Busquem la relació d'amistat
+            $friends = User_friend::areFriends(Auth::user()->id, $request->friend_id);
+
+            // Comprovem si la relació existeix
+            if ($friends) {
+                User_friend::deleteFriendship(Auth::user()->id, $request->friend_id);
+            } else {
+                // Si no existeix la relació retornem un error
+                return response()->json(['error' => 'No s\'ha trobat la relació d\'amistat a eliminar'], 404);
+            }
+
+            // Enviem l'esdeveniment d'eliminar amic
+            event(new RemoveFriend(Auth::user(),User::getUserById($request->friend_id)));
+
+            // Retornem un missatge de confirmació
+            return response()->json(['message' => 'S\'ha eliminat la relació d\'amistat', 'friend'=> User::getUserById($request->friend_id)->only('id', 'username', 'avatar')]);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->validator->getMessageBag()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Hi ha ocurregut un problema en el procés d\'eliminar la relació d\'amistat, tornar a provar o prova-ho més tard'], 500);
+        }
+    }
+
+
+    /**
+     * Funció per mostrar la vista de login
+     * @return \Illuminate\Contracts\View\View Retorna la vista de login
+     */
+    public function loginView()
+    {
+        $notFriends = User::getAll();
+        return view('login', compact('notFriends'));
+    }
 
 
     /**
@@ -341,6 +451,16 @@ class UserController extends Controller
     }
 
 
+    /**
+     * Funció per retornar la vista del registre
+     * @return \Illuminate\Contracts\View\View Retorna la vista del registre
+     */
+    public function registreView()
+    {
+        $notFriends = User::getAll();
+        return view('registre', compact('notFriends'));
+    }
+
 
     /**
      * Funció per a registrar-se
@@ -354,14 +474,14 @@ class UserController extends Controller
         try {
             $request->validate(
                 [
-                    'username' => 'required|unique:users|string|max:50',
+                    'username' => 'required|unique:users|string|max:15',
                     'email' => 'required|email|max:255|unique:users',
                     'password' => 'required|min:6|max:25|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/|confirmed',
                 ],
                 [
                     'username.required' => 'El camp nom d\'usuari és obligatori',
                     'username.string' => 'El camp nom d\'usuari ha de ser una cadena de caràcters',
-                    'username.max' => 'El camp nom d\'usuari ha de tenir un màxim de 50 caràcters',
+                    'username.max' => 'El camp nom d\'usuari ha de tenir un màxim de 15 caràcters',
                     'username.unique' => 'Aquest nom d\'usuari ja està registrat',
                     'email.required' => 'El camp correu electrònic és obligatori',
                     'email.email' => 'El camp correu electrònic ha de ser una adreça de correu vàlida',
@@ -611,7 +731,7 @@ class UserController extends Controller
 
             // Si no és amic retornem un error
             if (!User_friend::areFriends(Auth::user()->id, $friend->id)){
-                return response()->json(['error' => 'No pots veure la conversació amb aquest usuari perquè no sou amics'. $friend->id], 403);
+                return response()->json(['error' => 'No pots veure la conversació amb aquest usuari perquè no sou amics'], 403);
             }
             // Busquem els missatges de l'usuari amb l'usuari receptor
             $messages = User_message::getConversation(Auth::user()->id, $friend->id);

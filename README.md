@@ -2,16 +2,20 @@
 - Acabar wireframe
 - Mockup
 - Millorar disseny
-- Netejar i organitzar el codi
-- Perfil
-    - Usuari amic
-        - Treure amics
-    - Usuari no amic
-        - Bloquear a usuari
-    - Propi perfil
-        - Afegir descripció
+- Cambio de diseño por mala gestión
+    - Que aparezca lo de los usuarios
+    - Que no haga lo del verflow
+    
 
+
+
+- Perfil
+    - Propi perfil
+        - Pod
 - Configuració
+- Estil 
+    - Escollir colors
+    - Escollir com serà el chat
 - Rutes
 - Busqueda de rutas y usuarios
     - Mejorar el diseño del dropdown y añadir busqueda de usuarios
@@ -36,7 +40,7 @@
     - Começar a seguir/Afegir com amic.
     - Bloquar. (Probablement no és farà)
 - Perfil propi
-    - Potser tenir aquí la modificació de parts del perfil i no a configuració.
+    - Podràs veure el teu perfil 
 - Ruta
     - Marcar com feta, donar like i comentar
     - Veure la informació de la ruta
@@ -47,5 +51,7 @@
 # Com instal·lar el projecte
 ## Passos per la instal·lació del projecte
 
+# Millores
+- Afegir opció per bloquejar a usuaris.
 
 

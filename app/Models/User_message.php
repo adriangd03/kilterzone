@@ -60,5 +60,9 @@ class User_message extends Model
         User_message::where('user_id', $friend_id)->where('receiver_id', $user_id)->update(['read' => 1]);
     }
 
-    
+    public static function deleteMessagesBetweenUsers($user_id, $friend_id)
+    {
+        User_message::where('user_id', $user_id)->where('receiver_id', $friend_id)->delete();
+        User_message::where('user_id', $friend_id)->where('receiver_id', $user_id)->delete();
+    }
 }

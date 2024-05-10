@@ -27,15 +27,58 @@
             <!-- button per obrir el xat, barra de busqueda i button per afegir amics-->
             <div class="d-flex align-items-center">
 
+                @guest
+                <div class="dropdown" id="dropdownAddFriend">
+                    <button class="btn btn-dark border border-white dropdown position-relative" data-bs-toggle="dropdown" href="#dropdownAddFriend" role="button" aria-expanded="false" aria-controls="dropdownAddFriend">
+                        <i class="bi bi-person-plus"></i>
+                    </button>
+
+                    <div id="users-dropdown" class="dropdown-menu overflow-auto" aria-labelledby="dropdownMenuButton">
+
+
+                        <div class="container">
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">Usuaris</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+                                    @foreach ($notFriends as $user)
+                                    <div id="divNotFriend-{{ $user->id }}" class="dropdown-item">
+                                        <div class="d-flex justify-content-between ">
+                                            <div class="d-flex align-items-center">
+                                                <img class="rounded-circle" src="{{ $user->avatar }}" alt="avatar 1" style="width: 45px; height: 100%;">
+                                                <div class="ms-2">
+                                                    <div class="fw-bold">{{ $user->username }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <a href="{{route('perfil', $user->id)}}" class="btn btn-dark border border-white">Visitar perfil</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+                @endguest
+
+
                 @auth
-
-
                 <!-- Dropdown dels usuaris no amics amb botons per afegir amic i visitar perfil-->
                 <div class="dropdown" id="dropdownAddFriend">
                     <button class="btn btn-dark border border-white dropdown position-relative" data-bs-toggle="dropdown" href="#dropdownAddFriend" role="button" aria-expanded="false" aria-controls="dropdownAddFriend">
                         <i class="bi bi-person-plus"></i>
 
-                        <span name="SolAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if($totalFriendRequests == 0) style="display: none;" @endif>
+                        <span name="SolAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if($totalFriendRequests==0) style="display: none;" @endif>
                             {{ $totalFriendRequests }}
                             <span class="visually-hidden">Sol·licituds d'amistat</span>
                         </span>
@@ -72,7 +115,6 @@
                                                 <img class="rounded-circle" src="{{ $user->avatar }}" alt="avatar 1" style="width: 45px; height: 100%;">
                                                 <div class="ms-2">
                                                     <div class="fw-bold">{{ $user->username }}</div>
-                                                    <div>{{ $user->email }}</div>
                                                 </div>
                                             </div>
                                             <div class="d-flex align-items-center">
@@ -85,7 +127,7 @@
                                                     <button class="btn btn-dark border border-white" type="submit">Afegir amic</button>
                                                 </form>
                                                 @endif
-                                                <a class="btn btn-dark border border-white">Visitar perfil</a>
+                                                <a href="{{route('perfil', $user->id)}}" class="btn btn-dark border border-white">Visitar perfil</a>
                                             </div>
                                         </div>
                                     </div>
@@ -110,7 +152,7 @@
                                                     <input type="hidden" name="friend_id" value="{{ $friendRequest->user->id }}">
                                                     <button class="btn btn-primary border border-white" type="submit">Acceptar</button>
                                                 </form>
-                                                <form name="formRebutjarSolAmic"  action="rebutjarSolicitudAmic" method="POST">
+                                                <form name="formRebutjarSolAmic" action="rebutjarSolicitudAmic" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="friend_id" value="{{ $friendRequest->user->id }}">
                                                     <button class="btn btn-danger border border-white" type="submit">Rebutjar</button>
@@ -172,7 +214,7 @@
                         </a>
                         <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in">
 
-                            <a class="dropdown-item" href="{{ route('home') }}">
+                            <a class="dropdown-item" href="{{ route('perfilPropi') }}">
                                 <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Perfil
                             </a>
                             <a class="dropdown-item" href="#">
@@ -201,3 +243,6 @@
 
     </nav>
 </header>
+
+
+@include('partials.chat')

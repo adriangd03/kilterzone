@@ -145,6 +145,22 @@ class User_friend extends Model
         return $not_friends;
     }
 
+    /**
+     * Funció que 
+     */
+    public static function deleteFriendship($user_id, $friend_id)
+    {
+        User_friend::where(function ($query) use ($user_id, $friend_id) {
+            $query->where('user_id', $user_id)
+                ->where('friend_id', $friend_id);
+        })->orWhere(function ($query) use ($user_id, $friend_id) {
+            $query->where('user_id', $friend_id)
+                ->where('friend_id', $user_id);
+        })->delete();
+
+        User_message::deleteMessagesBetweenUsers($user_id, $friend_id);
+    }
+
     
 
 }

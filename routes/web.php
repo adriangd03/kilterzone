@@ -16,13 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [UserController::class, 'home'])->name('home');
 
-Route::get('login', function () {
-    return view('login');
-})->name('login')->middleware('guest');
+Route::get('login',[UserController::class, 'loginView'])->name('login')->middleware('guest');
 
-Route::get('registre', function () {
-    return view('registre');
-})->name('registre')->middleware('guest');
+Route::get('registre',[UserController::class, 'registreView'])->name('registre')->middleware('guest');
 
 Route::post('login', [UserController::class, 'login'])->name('login')->middleware('guest');
 
@@ -53,3 +49,13 @@ Route::post('enviarSolicitudAmic', [UserController::class, 'enviarSolicitudAmic'
 Route::post('acceptarSolicitudAmic', [UserController::class, 'acceptarSolicitudAmic'])->name('acceptarSolicitudAmic')->middleware('auth');
 
 Route::post('rebutjarSolicitudAmic', [UserController::class, 'rebutjarSolicitudAmic'])->name('rebutjarSolicitudAmic')->middleware('auth');
+
+Route::post('eliminarAmic', [UserController::class, 'eliminarAmic'])->name('eliminarAmic')->middleware('auth');
+
+Route::get('perfil/{id}', [UserController::class, 'perfil'])->name('perfil');
+
+Route::get('perfil', [UserController::class, 'perfilPropi'])->name('perfilPropi')->middleware('auth');
+
+Route::get('pruebas', function(){
+    return view('pruebas');
+});

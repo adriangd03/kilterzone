@@ -1,6 +1,14 @@
-@import 'bootstrap/dist/css/bootstrap.min.css';
-@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
+body {
+    background-color: #f0f0f0;
+    font-family: 'Nunito', sans-serif;
+}
+
+.avatar {
+    width: 100%;
+}
 
 .card-text p {
     word-break: break-word;
@@ -12,26 +20,64 @@
     overflow-y: auto;
 }
 
-#users-dropdown{
-    min-width:  30vw;
+.users-list {
+    height: 55vh;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.friends-list {
+    height: 26vh;
+    max-height: 52vh;
+    overflow-y: auto;
+}
+
+#users-dropdown {
+    min-width: 30vw;
 }
 
 .user-selected {
     background-color: #f0f0f0;
 }
 
-#offcanvasChat{
+.user-hover:hover {
+    background-color: #f0f0f0;
+}
+
+.content{
+    max-width: 100%;
+    margin: 0 auto;
+
+}
+
+#offcanvasChat {
+    width: 100%;
+    max-width: 40vw;
+}
+#offcanvasUsuaris {
     width: 100%;
     max-width: 40vw;
 }
 
+#amics {
+    max-height: 50vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 @media screen and (max-width: 768px) {
-    #offcanvasChat{
+    #offcanvasChat {
         max-width: 80%;
     }
 
     .chat-list {
         height: 40vh;
     }
-    
 }
+
+
+           
+  
+
+  
+  

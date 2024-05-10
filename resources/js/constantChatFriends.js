@@ -16,9 +16,12 @@ export const divToasts = document.getElementById("divToasts");
 // Constant del badge de notificacions
 export const notificacionsBadge = document.getElementById("notificacionsBadge");
 // Constant del badge de sol·licituds d'amistat
-export const $solAmicsBadge = $('[name="SolAmicsBadge"]');
+export const $solAmicsBadge = $('[name="solAmicsBadge"]');
+// Constant del value del badge de sol·licituds d'amistat
+export const $solAmicsBadgeValue = $('[name="solAmicBadgeValue"]');
 // Constant del div de sol·licituds d'amistat
-export const divSolAmics = document.getElementById("solAmics");
+export const divSolAmics = document.getElementById("DivSolAmics");
+// Constant del 
 // Constant del canal de xat
 export const channel = Echo.join(`presence.ChatMessage.${userId}`);
 // Constant del canal per els usuaris online, per saber si estan escrivint i per el enviament de Sol·icituds d'amistat

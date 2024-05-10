@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use App\Notifications\ResetPasswordNotification;
+use App\Models\User_friend;
+use App\Models\User_message;
 
 class User extends Authenticatable implements CanResetPassword
 {
@@ -86,6 +88,15 @@ class User extends Authenticatable implements CanResetPassword
     }
 
     /**
+     * Funció per obtenir tots els usuaris
+     * @return array<User> Usuaris
+     */
+    public static function getAll()
+    {
+        return User::all();
+    }
+
+    /**
      * Funció per obtenir un usuari a partir del seu nom d'usuari
      * @param string $username Nom d'usuari
      * @return User Usuari amb el nom d'usuari especificat
@@ -105,6 +116,60 @@ class User extends Authenticatable implements CanResetPassword
         return User::where('email', $email)->first();
     }
     
+
+    /**
+     * Funció per agafar les dades necessàries per les funcions del chat i amistats
+     * @return array<string, mixed> Dades de l'usuari
+     */
+    public static function getChatData(){
+
+        $user = User::getUserById(auth()->user()->id);
+        // Agafem el amics de l'usuari
+        $friends = User_friend::getFriends($user->id);
+        // Agafem les sol·licituds d'amistat de l'usuari
+        $friendRequests = User_friend::getFriendRequests($user->id);
+        // Afegim la informació de l'usuari a les sol·licituds d'amistat
+        $friendRequests = $friendRequests->map(function ($friendRequest) {
+            $friendRequest->user = User::getUserById($friendRequest->user_id);
+            return $friendRequest;
+        });
+        // Agafem les sol·licituds d'amistat enviades per l'usuari
+        $sentFriendRequests = User_friend::getFriendRequestsSent($user->id);
+        // Agafem els missatges no llegits de l'usuari
+        $unreadMessages = User_message::getUserMessagesReceivedUnread($user->id);
+
+         // Afegeix el nombre de missatges no llegits a cada usuari
+         $friends = $friends->map(function ($friend) use ($unreadMessages) {
+            $friend->unreadMessages = $unreadMessages->where('user_id', $friend->id)->count();
+            return $friend;
+        });
+
+        // Agafem els usuaris no amics de l'usuari
+        $notFriends = User_friend::getNotFriends($user->id);
+
+        // Afegim als usuaris no amics les sol·licituds d'amistat enviades
+        $notFriends = $notFriends->map(function ($notFriend) use ($sentFriendRequests) {
+            $sentFriendRequest = $sentFriendRequests->where('friend_id', $notFriend->id)->first();
+            if ($sentFriendRequest) {
+                $notFriend->sentFriendRequest = true;
+            }
+            return $notFriend;
+        });
+
+        // Agafem el total de missatges no llegits
+        $totalUnreadMessages = $unreadMessages->count();
+
+        // Agafem el total de sol·licituds d'amistats pendents
+        $totalFriendRequests = $friendRequests->count();
+
+        return [
+            'friends' => $friends,
+            'friendRequests' => $friendRequests,
+            'notFriends' => $notFriends,
+            'totalUnreadMessages' => $totalUnreadMessages,
+            'totalFriendRequests' => $totalFriendRequests
+        ];
+    }
 
     
 }

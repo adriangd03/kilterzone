@@ -1,4 +1,4 @@
-import { chat, authUserAvatar, receiver, divSolAmics, $solAmicsBadge } from './constantChatFriends.js';
+import { chat, authUserAvatar, receiver, divSolAmics, $solAmicsBadge,$solAmicsBadgeValue, userId, form } from './constantChatFriends.js';
 import missatges from './chat.js';
 import toastAlerts from './alerts.js';
 import notificacions from './notificacions.js';
@@ -10,6 +10,12 @@ import notificacions from './notificacions.js';
 export function seleccionarUsuari(e) {
     // Evitar que quan el usuari faci doble click es seleccioni el text
     if (e.detail === 2) e.preventDefault();
+
+
+    // Comprovem que no hi hagin clicat en el link de visitar perfil
+    if (e.target.tagName === "A") {
+        return;
+    }
 
     // Agafar el user div que s'ha clicat
     const userDiv = $(e.target).closest(".friend")[0];
@@ -55,17 +61,69 @@ export function seleccionarUsuari(e) {
         missatges.grabUserMessages(friendId, friendAvatar, friendUsername);
     }
 }
+/**
+ * Funció per crear un formulari per afegir un amic
+ * @param {int} friendId id de l'usuari a afegir
+ * @returns {jquery} retorna el formulari creat
+ */
+function crearFormAfegirAmic(friendId) {
+    let form = $('<form>', { id: `formAfegirAmic${friendId}`, name: `formAfegirAmic${friendId}`, action: "afegirAmic", method: "POST" });
+    form.append($('<input>', { type: "hidden", name: "friend_id", value: friendId }));
+    form.append($('<button>', { class: "btn btn-primary", type: "submit" }).text("Afegir amic"));
+    form.on('submit', friends.enviarSolAmic);
+    return form;
+}
+/**
+ * Funció per crear un formulari per eliminar un amic
+ * @param {int} friendId id de l'amic a eliminar
+ * @returns {jquery} retorna el formulari creat
+ */
+function crearFormEliminarAmic(friendId) {
+    let form = $('<form>', { id: "formEliminarAmic", name: "formEliminarAmic", action: "/eliminarAmic", method: "POST" });
+    form.append($('<input>', { type: "hidden", name: "friend_id", value: friendId }));
+    form.append($('<button>', { class: "btn btn-danger", type: "submit" }).text("Eliminar amic"));
+    form.on('submit', friends.eliminarAmic);
 
+    return form;
+}
 
+/**
+ * Funció per eliminar un amic de la llista d'amics i afegir-lo a la llista de usuaris
+ * @param {int} friendId id de l'amic a eliminar
+ */
+function eliminarAmicHtml(friendId) {
+    notificacions.cleanUserNotifications(friendId);
+    $(`#${friendId}`).remove();
+    $(`#totalAmics${friendId}`).html(parseInt($(`#totalAmics${friendId}`).html()) - 1);
+    $(`#formEliminarAmic`).remove();
+    let form = friends.crearFormAfegirAmic(friendId);
+    $(`#divFormFriend${friendId}`).append(form);
+    receiver.value = 0;
+    $(chat).html("");
+}
+
+// TODO Modificar las funciones de HTML
 var friends = {
+
+    crearFormAfegirAmic: crearFormAfegirAmic
+    ,
+    crearFormEliminarAmic: crearFormEliminarAmic
+    ,
+    eliminarAmicHtml: eliminarAmicHtml
+    ,
     /**
      * Funció per mostrar a un nou amic
      * @param {object} friend 
      * @param {jquery} $element 
      */
     mostrarNouAmic: function (friend, $element) {
-        var $div = $('<div>', { class: "friend col-3 p-2 justify-content-center position-relative text-center", id: friend.id });
-        $div.append($('<div>', { class: "user-info" }).append($('<img>', { class: "rounded-circle", src: friend.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }), $('<div>', { class: "card-text" }).append($('<div>', { class: "friend-username" }).text(friend.username), $('<div>', { class: "user-status", id: `status${friend.id}` }).text("Online"))));
+        var $div = $('<div>', { class: "friend col-3 p-2 justify-content-center position-relative text-center user-hover", id: friend.id });
+        $div.append($('<div>', { class: "user-info" }).append
+            ($('<img>', { class: "rounded-circle", src: friend.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }),
+                $('<div>', { class: "card-text" }).append
+                    ($('<div>', { class: "friend-username" }).text(friend.username),
+                        $('<div>', { class: "user-status", id: `status${friend.id}` }).text("Online")),
+                $('<a>', { href: `/perfil/${friend.id}`, class: "btn btn-primary" }).text("Visitar perfil")));
 
         var $badge = $('<span>', { class: "badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle", id: `b-${friend.id}` });
         $badge.hide();
@@ -73,6 +131,27 @@ var friends = {
         $div.append($badge);
         $div.on('click', seleccionarUsuari);
         $element.append($div);
+    },
+    /**
+     * Funció per mostrar un nou usuari no amic
+     * @param {object} friend informació de l'usuari que era amic
+     * @param {jquery} $element element on es mostrarà l'usuari
+     */
+    mostrarNouUsuariNoAmic: function (friend) {
+        let $element = $('#users');
+        var $a = $('<a>', { href: `/perfil/${friend.id}`, class: " text-decoration-none rounded user-hover", id: `divNotFriend-${friend.id}` });
+        $a.append($('<div>', { class: "row m-1 w-100 pt-2 pb-2" })
+            .append($('<div>', { class: "col align-content-center" })
+                .append($('<div>', { class: "d-flex d-inline align-items-center align-content-center" })
+                    .append($('<img>', { class: "rounded-circle", src: friend.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }),
+                        $('<div>', { class: "card-text ms-1" })
+                            .append($('<div>', { class: 'text-dark' }).text(friend.username)))),
+
+            $('<div>', { class: "col align-content-center" }).append(friends.crearFormAfegirAmic(friend.id))));
+
+
+
+        $element.append($a);
     },
     /**
      * Funció per enviar la sol·licitud d'amistat
@@ -83,11 +162,27 @@ var friends = {
         const formData = new FormData(e.target);
 
         axios
-            .post("enviarSolicitudAmic", formData)
+            .post("/enviarSolicitudAmic", formData)
             .then((response) => {
                 console.log(response);
-                $(e.target).find("button").attr("disabled", true);
-                $(e.target).find("button").html("Sol·icitud enviada");
+                if (e.target.tagName == "formSolAmic") {
+                    $(e.target).find("button").attr("disabled", true);
+                    $(e.target).find("button").html("Sol·licitud enviada");
+
+                    try {
+                        $(`#formAfegirAmic${formData.get('friend_id')}`).find("button").attr("disabled", true);
+                        $(`#formAfegirAmic${formData.get('friend_id')}`).find("button").html("Sol·icitud enviada");
+                    } catch (err) {
+                        console.log(err);
+                    }
+                } else {
+                    $(e.target).find("button").attr("disabled", true);
+                    $(e.target).find("button").html("Sol·licitud enviada");
+
+                    $(`#divNotFriend-${formData.get('friend_id')}`).find("button").attr("disabled", true);
+                    $(`#divNotFriend-${formData.get('friend_id')}`).find("button").html("Sol·licitud enviada");
+
+                }
                 toastAlerts.mostrarToast("success", "Sol·licitud enviada", $(divToasts));
             })
             .catch((error) => {
@@ -104,17 +199,25 @@ var friends = {
         const formData = new FormData(e.target);
 
         axios
-            .post("acceptarSolicitudAmic", formData)
+            .post("/acceptarSolicitudAmic", formData)
             .then((response) => {
                 friends.mostrarNouAmic(response.data.user, $('#amics'));
                 $(`#solAmic-${response.data.user.id}`).remove();
                 toastAlerts.mostrarToast("success", "Sol·licitud aceptada", $(divToasts));
                 $(`#divNotFriend-${response.data.user.id}`).remove();
                 $(`#solAmics-${response.data.user.id}`).remove();
-                $('[name="SolAmicsBadge"]').html(parseInt($('[name="SolAmicsBadge"]').html()) - 1);
-                if ($('[name="SolAmicsBadge"]').html() == 0) {
-                    $('[name="SolAmicsBadge"]').hide();
+                $solAmicsBadgeValue.html(parseInt($solAmicsBadgeValue.innerHTML) - 1);
+                if (parseInt($solAmicsBadgeValue.innerHTML) == 0) {
+                    $solAmicsBadge.hide();
                     $(divSolAmics).html('<div class="text-center fw-bold">No hi ha sol·licituds de amistat</div>');
+                }
+                try {
+                    $(`#divFormFriend${response.data.user.id}`).html('');
+                    let form = friends.crearFormEliminarAmic(response.data.user.id);
+                    $(`#divFormFriend${response.data.user.id}`).append(form);
+                    $(`#totalAmics${response.data.user.id}`).html(parseInt($(`#totalAmics${response.data.user.id}`).html()) + 1);
+                } catch (err) {
+                    console.log(err);
                 }
             })
             .catch((error) => {
@@ -131,12 +234,12 @@ var friends = {
         const formData = new FormData(e.target);
 
         axios
-            .post("rebutjarSolicitudAmic", formData)
+            .post("/rebutjarSolicitudAmic", formData)
             .then((response) => {
-                $(e.target).closest(".dropdown-item").remove();
-                $('[name="SolAmicsBadge"]').html(parseInt($('[name="SolAmicsBadge"]').html()) - 1);
-                if ($('[name="SolAmicsBadge"]').html() == 0) {
-                    $('[name="SolAmicsBadge"]').hide();
+                $(e.target).closest("[name='divSolAmic']").remove();
+                $solAmicsBadgeValue.html(parseInt($solAmicsBadgeValue.innerHTML) - 1);
+                if (parseInt($solAmicsBadgeValue.innerHTML) == 0) {
+                    $solAmicsBadge.hide();
                     $(divSolAmics).html('<div class="text-center fw-bold">No hi ha sol·licituds de amistat</div>');
                 }
                 toastAlerts.mostrarToast("success", "Sol·licitud rebutjada", $(divToasts));
@@ -153,7 +256,7 @@ var friends = {
      */
     mostrarSolicitud: function (user) {
         // Si no hi ha cap sol·licitud, esborrar el text
-        if($solAmicsBadge.html() == 1){
+        if (parseInt($solAmicsBadgeValue.innerHTML) == 1) {
             $(divSolAmics).html('');
         }
 
@@ -179,6 +282,28 @@ var friends = {
         $(divSolAmics).append($div);
 
     },
+
+    /**
+     * Funció per eliminar un amic
+     * @param {object} e Event del click
+     */
+    eliminarAmic: function (e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        axios
+            .post("/eliminarAmic", formData)
+            .then((response) => {
+                $(e.target).remove();
+                toastAlerts.mostrarToast("success", "Amic eliminat", $(divToasts));
+                eliminarAmicHtml(formData.get('friend_id'));
+                friends.mostrarNouUsuariNoAmic(response.data.friend, $('#users'));
+            })
+            .catch((error) => {
+                console.error(error);
+                toastAlerts.mostrarErrors(error.response.data.error, $(divToasts));
+            });
+    }
 };
 
 export default friends;

@@ -41,20 +41,36 @@ var notificacions = {
      * Funció per sumar una notificació de sol·licitud d'amistat
      */
     sumarSolAmics: function () {
-        $solAmicsBadgeValue.html((parseInt($solAmicsBadgeValue.html()) ?? 0) + 1);
-        $solAmicsBadge.show();
+        console.log($($($solAmicsBadgeValue['0'])).html());
+        $($solAmicsBadgeValue['0']).html((parseInt($($solAmicsBadgeValue['0']).html()) ?? 0) + 1);
+        $($solAmicsBadgeValue['1']).html((parseInt($($solAmicsBadgeValue['1']).html()) ?? 0) + 1);
+        $($solAmicsBadge['0']).show();
+        $($solAmicsBadge['1']).show();
     },
     /**
      * Funció per restar una notificació de sol·licitud d'amistat
      */
     restarSolAmics: function () {
-        $solAmicsBadgeValue.html(parseInt($solAmicsBadgeValue.innerHTML) - 1);
-        if (parseInt($solAmicsBadgeValue.innerHTML) == 0) {
-            $solAmicsBadge.hide();
+        $($solAmicsBadgeValue['0']).html(parseInt($($solAmicsBadgeValue['0']).html()) - 1);
+        $($solAmicsBadgeValue['1']).html(parseInt($($solAmicsBadgeValue['1']).html()) - 1);
+        if (parseInt($($solAmicsBadgeValue['0']).html()) == 0) {
+            $($solAmicsBadge['0']).hide();
+            $($solAmicsBadge['1']).hide();
+            $(divSolAmics).append($('<div>', { class: "text-center fw-bold" }).text("No tens sol·licituds d'amistat pendents"));
+        }
+    },
+
+    comprobarNotificacions: function (friendId) {
+        if(parseInt($($solAmicsBadgeValue['0']).html()) > 0){
+            $(divSolAmics).html('');
+        }
+    },
+    comprobarNoNotificacions: function () {
+        if(parseInt($($solAmicsBadgeValue['0']).html()) == 0){
             $(divSolAmics).append($('<div>', { class: "text-center fw-bold" }).text("No tens sol·licituds d'amistat pendents"));
         }
     }
-// TODO Solucionar prblema de notificacions de soliciutds d'amistat
+
 }
 
 

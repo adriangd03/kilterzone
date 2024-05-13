@@ -14,27 +14,27 @@
 </head>
 
 <body class="bg-body ">
+    <div id="body">
 
-    <div class="row p-0 ">
-        <div class="col-12 p-0 ">
+        <div class="shell">
 
-            <div class="row flex-nowrap p-0">
-
+            <div id="left" >
                 @include('partials.sidebar')
-                <div class="position-relative">
+            </div>
+            <div id="mid" style="min-width: 0;">
 
-                    @yield('content')
+                @yield('content')
 
-                    <div aria-live="polite" aria-atomic="true" class="position-relative m-5">
-                        <div id="divToasts" class="toast-container top-5 start-5 p-3">
+                <div aria-live="polite" aria-atomic="true" class="position-relative m-5">
+                    <div id="divToasts" class="toast-container top-5 start-5 p-3">
 
 
-                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
+    </div>
     </div>
 </body>
 

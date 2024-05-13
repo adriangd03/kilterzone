@@ -1,4 +1,4 @@
-<div class="border border-end col-auto col-md-4 col-lg-2 min-vh-100">
+<div class="border border-end min-vh-100">
     <div class="p-2 d-flex flex-column min-vh-100">
         <div class="d-flex justify-content-center mt-3 mb-4">
             <span class=" fs-4 d-none d-sm-inline">KilterZone</span>
@@ -21,8 +21,8 @@
                     <i class="bi bi-person fs-4"></i>
                     <span class="fs-6 ms-1 d-none d-sm-inline">Usuaris</span>
                     @auth
-                    <span name="SolAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if ($totalFriendRequests==0) { style="display: none;" } @endif>
-                        {{ $totalFriendRequests }}
+                    <span name="solAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if ($totalFriendRequests == 0) style="display: none;" @endif>
+                        <span name="solAmicBadgeValue"> {{$totalFriendRequests }}</span>
                         <span class="visually-hidden">Sol·licituds d'amistat</span>
                     </span>
                     @endauth

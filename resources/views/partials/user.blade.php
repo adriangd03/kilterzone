@@ -23,7 +23,7 @@
                             <li class="nav-item position-relative">
                                 <a class="nav-link" id="solAmics-tab" data-bs-toggle="tab" href="#solAmics" role="tab" aria-controls="solAmics" aria-selected="false">Sol·licituds d'amistat</a>
 
-                                <span name="solAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if ($totalFriendRequests==0) { style="display: none;" } @endif>
+                                <span name="solAmicsBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @if ($totalFriendRequests == 0) style="display: none;" @endif>
                                     <span name="solAmicBadgeValue"> {{$totalFriendRequests }}</span>
                                     <span class="visually-hidden">Sol·licituds d'amistat</span>
                                 </span>
@@ -82,9 +82,9 @@
                                     <div class="card-body h-100 mh-100 ">
                                         <div id="DivSolAmics" class="users-list  row mh-100 p-3">
                                             @foreach($friendRequests as $friendRequest)
-                                            <div class="col-4">
+                                            <div class="col-4" name="divSolAmic">
                                                 <a href="{{ route('perfil', $friendRequest->user->id) }}" class="text-decoration-none">
-                                                    <div id="solAmic-{{$friendRequest->user->id}}" class="col-12 text-center p-2  rounded user-hover " name="divSolAmic">
+                                                    <div id="solAmic-{{$friendRequest->user->id}}" class="col-12 text-center p-2  rounded user-hover ">
                                                         <div class="user-info">
                                                             <img class="rounded-circle" src="{{$friendRequest->user->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
                                                             <div class="card-text">

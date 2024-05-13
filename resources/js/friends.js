@@ -1,4 +1,4 @@
-import { chat, authUserAvatar, receiver, divSolAmics, $solAmicsBadge,$solAmicsBadgeValue, userId, form } from './constantChatFriends.js';
+import { chat, authUserAvatar, receiver, divSolAmics, $solAmicsBadge, $solAmicsBadgeValue, userId, form, notificacionsBadge } from './constantChatFriends.js';
 import missatges from './chat.js';
 import toastAlerts from './alerts.js';
 import notificacions from './notificacions.js';
@@ -102,7 +102,6 @@ function eliminarAmicHtml(friendId) {
     $(chat).html("");
 }
 
-// TODO Modificar las funciones de HTML
 var friends = {
 
     crearFormAfegirAmic: crearFormAfegirAmic
@@ -147,7 +146,7 @@ var friends = {
                         $('<div>', { class: "card-text ms-1" })
                             .append($('<div>', { class: 'text-dark' }).text(friend.username)))),
 
-            $('<div>', { class: "col align-content-center" }).append(friends.crearFormAfegirAmic(friend.id))));
+                $('<div>', { class: "col align-content-center" }).append(friends.crearFormAfegirAmic(friend.id))));
 
 
 
@@ -206,11 +205,7 @@ var friends = {
                 toastAlerts.mostrarToast("success", "Sol·licitud aceptada", $(divToasts));
                 $(`#divNotFriend-${response.data.user.id}`).remove();
                 $(`#solAmics-${response.data.user.id}`).remove();
-                $solAmicsBadgeValue.html(parseInt($solAmicsBadgeValue.innerHTML) - 1);
-                if (parseInt($solAmicsBadgeValue.innerHTML) == 0) {
-                    $solAmicsBadge.hide();
-                    $(divSolAmics).html('<div class="text-center fw-bold">No hi ha sol·licituds de amistat</div>');
-                }
+                notificacions.restarSolAmics();
                 try {
                     $(`#divFormFriend${response.data.user.id}`).html('');
                     let form = friends.crearFormEliminarAmic(response.data.user.id);
@@ -237,11 +232,7 @@ var friends = {
             .post("/rebutjarSolicitudAmic", formData)
             .then((response) => {
                 $(e.target).closest("[name='divSolAmic']").remove();
-                $solAmicsBadgeValue.html(parseInt($solAmicsBadgeValue.innerHTML) - 1);
-                if (parseInt($solAmicsBadgeValue.innerHTML) == 0) {
-                    $solAmicsBadge.hide();
-                    $(divSolAmics).html('<div class="text-center fw-bold">No hi ha sol·licituds de amistat</div>');
-                }
+                notificacions.restarSolAmics();
                 toastAlerts.mostrarToast("success", "Sol·licitud rebutjada", $(divToasts));
             })
             .catch((error) => {
@@ -256,28 +247,30 @@ var friends = {
      */
     mostrarSolicitud: function (user) {
         // Si no hi ha cap sol·licitud, esborrar el text
-        if (parseInt($solAmicsBadgeValue.innerHTML) == 1) {
-            $(divSolAmics).html('');
-        }
+        notificacions.comprobarNotificacions();
 
+        var $formAcceptarAmic = $('<form>', { name: "formAcceeptarSolAmic", method: "POST", action: "acceptarSolicitudAmic" });
+        $formAcceptarAmic.append($('<input>', { type: "hidden", name: "friend_id", value: user.id }));
+        $formAcceptarAmic.append($('<button>', { class: "btn btn-primary", type: "submit" }).text("Acceptar"));
+        $formAcceptarAmic.on('submit', friends.acceptarSolAmic);
 
-        var $div = $('<div>', { class: "dropdown-item", id: `solAmic-${user.id}` });
-        let form = $('<form>', { name: "formAcceptarSolAmic", action: "acceptarSolicitudAmic", method: "POST" });
-        form.append($('<input>', { type: "hidden", name: "friend_id", value: user.id }));
-        form.append($('<button>', { class: "btn btn-primary border border-white", type: "submit" }).text("Acceptar"));
+        var $formRebutjarAmic = $('<form>', { name: "formRebutjarSolAmic", method: "POST", action: "rebutjarSolicitudAmic" });
+        $formRebutjarAmic.append($('<input>', { type: "hidden", name: "friend_id", value: user.id }));
+        $formRebutjarAmic.append($('<button>', { class: "btn btn-danger", type: "submit" }).text("Rebutjar"));
+        $formRebutjarAmic.on('submit', friends.rebutjarSolAmic);
 
-        let form2 = $('<form>', { name: "formRebutjarSolAmic", action: "rebutjarSolicitudAmic", method: "POST" });
-        form2.append($('<input>', { type: "hidden", name: "friend_id", value: user.id }));
-        form2.append($('<button>', { class: "btn btn-danger border border-white", type: "submit" }).text("Rebutjar"));
+        var $div = $('<div>', { class: "col-4", name: "divSolAmic" });
+        var $a = $('<a>', { href: `/perfil/${user.id}`, class: "text-decoration-none" });
+        $a.append($('<div>', { id: `solAmic-${user.id}`, class: "col-12 text-center p-2 rounded user-hover" })
+            .append($('<div>', { class: "user-info" })
+                .append(
+                    $('<img>', { class: "rounded-circle", src: user.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }),
+                    $('<div>', { class: "card-text" })
+                        .append($('<div>', { class: "fw-bold text-dark" }).text(user.username)),
+                    $formAcceptarAmic,
+                    $formRebutjarAmic)));
 
-        $div.append($('<div>', { class: "d-flex justify-content-center" })
-            .append($('<img>', { class: "rounded-circle", src: `${user.avatar}`, alt: "avatar 1", style: "width: 45px; height: 100%;" })
-                , $('<div>', { class: "ms-2" })
-                    .append($('<div>', { class: 'fw-bold' }).text(user.username))
-                , form, form2));
-
-        form.on('submit', this.acceptarSolAmic);
-        form2.on('submit', this.rebutjarSolAmic);
+        $div.append($a);
 
         $(divSolAmics).append($div);
 

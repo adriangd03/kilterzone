@@ -1,18 +1,10 @@
 # ToDo
 - Acabar wireframe
 - Mockup
-- Millorar disseny
-- Cambio de diseño por mala gestión
-    - Que aparezca lo de los usuarios
-    - Que no haga lo del verflow
-    
 
-
-
-- Perfil
-    - Propi perfil
-        - Pod
 - Configuració
+    - Modificar nom, avatar i contraseya
+    - Modificar perfil
 - Estil 
     - Escollir colors
     - Escollir com serà el chat

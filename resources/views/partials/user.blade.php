@@ -45,8 +45,8 @@
                                                 <div  class="row m-1 w-100 pt-2 pb-2 ">
                                                     <div class="col align-content-center">
                                                         <div class="d-flex d-inine align-content-center align-items-center">
-                                                            <img class="rounded-circle" src="{{ $user->avatar }}" alt="avatar 1" style="width: 45px; height: 100%;">
-                                                            <div class="card-text ms-1">
+                                                            <img class="rounded-circle" src="{{ $user->avatar }}" alt="avatar 1" style="width: 45px; height: 45px;">
+                                                            <div class="card-text ms-2">
                                                                 <div class="friend-username text-dark">{{ $user->username }}</div>
                                                             </div>
 
@@ -86,7 +86,7 @@
                                                 <a href="{{ route('perfil', $friendRequest->user->id) }}" class="text-decoration-none">
                                                     <div id="solAmic-{{$friendRequest->user->id}}" class="col-12 text-center p-2  rounded user-hover ">
                                                         <div class="user-info">
-                                                            <img class="rounded-circle" src="{{$friendRequest->user->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
+                                                            <img class="rounded-circle" src="{{$friendRequest->user->avatar}}" alt="avatar 1" style="width: 45px; height: 45px;">
                                                             <div class="card-text">
                                                                 <div class="fw-bold text-dark">{{ $friendRequest->user->username }}</div>
                                                             </div>

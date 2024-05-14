@@ -7,10 +7,10 @@
             <li class="nav-item py-2 py-sm-0 ">
                 <a class="nav-link text-dark " href="{{route('home')}}">
                     <i class="bi bi-house fs-4"></i>
-                    <span class="fs-6 ms-1 d-sm-inline d-none">Inici</span>
+                    <span class="fs-6 ms-1  d-sm-inline d-none">Inici</span>
                 </a>
             </li>
-            <li class="nav-item py-2 py-sm-0">
+            <li class="nav-item py-2  py-sm-0">
                 <a class="nav-link  text-dark" href="#">
                     <i class="bi bi-search fs-4"></i>
                     <span class="fs-6 ms-1 d-none d-sm-inline">Buscar</span>
@@ -64,13 +64,16 @@
             <li class="nav-item dropdown no-arrow">
                 <div class="nav-item dropdown no-arrow">
                     <a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#">
-                        <img id="user_avatar" class="border bg-light rounded-circle img-profile" height="40px" width="40px" src="{{ Auth::user()->avatar }}" alt="avatar del usuari" />
+                        <img id="user_avatar" class="border bg-light rounded-circle" height="40px" width="40px" src="{{ Auth::user()->avatar }}" alt="avatar del usuari" />
                         <span class="d-none d-lg-inline me-2 text-gray-600 small">{{ Auth::user()->username }}
                         </span>
 
                     </a>
                     <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in">
 
+                        <a class="dropdown-item" href="{{ route('configuracio') }}">
+                            <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Configuració
+                        </a>
                         <a class="dropdown-item" href="{{ route('perfilPropi') }}">
                             <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Perfil
                         </a>

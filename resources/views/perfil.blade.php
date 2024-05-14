@@ -16,10 +16,10 @@
             <div class="card border-0">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-2 col-sm-3 offset-1">
-                            <img src="{{$user->avatar}}" class="img-fluid rounded-circle avatar" alt="...">
+                        <div class="col-md-2 col-sm-3 ">
+                            <img src="{{$user->avatar}}" class="rounded-circle " height="140px" width="140px" alt="...">
                         </div>
-                        <div class="col offset-md-1">
+                        <div class="col ">
                             <div class="row">
 
                                 <div class="col-2">

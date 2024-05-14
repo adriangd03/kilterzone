@@ -56,6 +56,13 @@ Route::get('perfil/{id}', [UserController::class, 'perfil'])->name('perfil');
 
 Route::get('perfil', [UserController::class, 'perfilPropi'])->name('perfilPropi')->middleware('auth');
 
-Route::get('pruebas', function(){
-    return view('pruebas');
-});
+Route::get('configuracio', [UserController::class, 'configuracio'])->name('configuracio')->middleware('auth');
+
+Route::post('actualitzarImatgePerfil', [UserController::class, 'actualitzarImatgePerfil'])->name('actualitzarImatgePerfil')->middleware('auth');
+
+Route::post('eliminarImatgePerfil', [UserController::class, 'eliminarImatgePerfil'])->name('eliminarImatgePerfil')->middleware('auth');
+
+Route::post('actualitzarDades', [UserController::class, 'actualitzarDades'])->name('actualitzarDades')->middleware('auth');
+
+Route::post('actualitzarContrasenya', [UserController::class, 'actualitzarContrasenya'])->name('actualitzarContrasenya')->middleware('auth');
+

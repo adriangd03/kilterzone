@@ -16,6 +16,10 @@ use App\Events\SendFriendRequest;
 use App\Events\ChatMessage;
 use App\Events\AcceptFriendRequest;
 use App\Events\RemoveFriend;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+
+
 
 
 
@@ -23,7 +27,7 @@ class UserController extends Controller
 {
 
 
-    
+
 
     /**
      * Funció per a mostrar la pàgina principal
@@ -37,7 +41,7 @@ class UserController extends Controller
                 $notFriends = User::getAll();
                 return view('home', compact('notFriends'));
             }
-            
+
 
             $chatData = User::getChatData();
             $friends = $chatData['friends'];
@@ -51,19 +55,20 @@ class UserController extends Controller
             return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar la pàgina principal retornem un error
-            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' .$e);
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' . $e);
             return view('home', compact('friends',  'notFriends', 'friendRequests', 'totalFriendRequests', 'totalUnreadMessages',));
         }
     }
 
-    
+
 
     /**
      * Funció per a mostrar el perfil d'un usuari
      * @param int $id Id de l'usuari
      * @return \Illuminate\Contracts\View\View Retorna la vista del perfil de l'usuari
      */
-    public function perfil($id){
+    public function perfil($id)
+    {
         try {
 
             if (!Auth::check()) {
@@ -83,7 +88,7 @@ class UserController extends Controller
                 return redirect()->route('home');
             }
 
-            if($user->id == Auth::user()->id){
+            if ($user->id == Auth::user()->id) {
                 return redirect()->route('home');
             }
 
@@ -111,7 +116,6 @@ class UserController extends Controller
             session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar el perfil de l\'usuari, tornar a provar o prova-ho més tard');
             return redirect()->route('home');
         }
-
     }
 
     /**
@@ -140,6 +144,37 @@ class UserController extends Controller
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar el perfil propi retornem un error
             session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar el perfil propi, tornar a provar o prova-ho més tard');
+            return redirect()->route('home');
+        }
+    }
+
+
+    /**
+     * Funció per a mostrar la configuració de l'usuari
+     * @return \Illuminate\Contracts\View\View Retorna la vista de la configuració de l'usuari
+     */
+    public function configuracio()
+    {
+        try {
+            // Agafem l'usuari autenticat
+            $user = Auth::user();
+
+            $chatData = User::getChatData();
+
+            $friends = $chatData['friends'];
+            $friendRequests = $chatData['friendRequests'];
+            $notFriends = $chatData['notFriends'];
+            $totalUnreadMessages = $chatData['totalUnreadMessages'];
+            $totalFriendRequests = $chatData['totalFriendRequests'];
+
+            // Agafar el nombre d'amics de l'usuari
+            $user->friends = User_friend::getFriends($user->id)->count();
+
+            // Retornem la vista de la configuració de l'usuari
+            return view('configuracio', compact('user', 'friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
+        } catch (\Exception $e) {
+            // Si hi ha algun error en el procés de mostrar la configuració de l'usuari retornem un error
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la configuració de l\'usuari, tornar a provar o prova-ho més tard');
             return redirect()->route('home');
         }
     }
@@ -327,10 +362,10 @@ class UserController extends Controller
             }
 
             // Enviem l'esdeveniment d'eliminar amic
-            event(new RemoveFriend(Auth::user(),User::getUserById($request->friend_id)));
+            event(new RemoveFriend(Auth::user(), User::getUserById($request->friend_id)));
 
             // Retornem un missatge de confirmació
-            return response()->json(['message' => 'S\'ha eliminat la relació d\'amistat', 'friend'=> User::getUserById($request->friend_id)->only('id', 'username', 'avatar')]);
+            return response()->json(['message' => 'S\'ha eliminat la relació d\'amistat', 'friend' => User::getUserById($request->friend_id)->only('id', 'username', 'avatar')]);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
@@ -399,12 +434,12 @@ class UserController extends Controller
             // Comprovem si el nom de usuari o correu electrònic existeixen
             if (isset($credentials['email'])) {
                 // Comprovem si l'usuari existeix
-                if (User::getUserByEmail($credentials['email'])->doesntExist()) {
+                if (User::getUserByEmail($credentials['email']) === null) {
                     // Si no existeix retornem un error
                     return redirect()->back()->withErrors(['email_username' => 'Aquest correu electrònic no està registrat',], 'login')->withInput();
                 }
-            // Comprovem si l'usuari existeix per nom d'usuari
-            } else if (User::getUserByUsername($credentials['username'])->doesntExist()) {
+                // Comprovem si l'usuari existeix per nom d'usuari
+            } else if (User::getUserByUsername($credentials['username']) === null) {
                 // Si no existeix retornem un error
                 return redirect()->back()->withErrors(['email_username' => 'Aquest nom d\'usuari no està registrat',], 'login')->withInput();
             }
@@ -678,7 +713,7 @@ class UserController extends Controller
             $receiver = User::getUserById($request->receiver);
 
             // Si no és amic retornem un error
-            if (User_friend::areFriends(Auth::user()->id, $receiver->id) == false){
+            if (User_friend::areFriends(Auth::user()->id, $receiver->id) == false) {
                 return response()->json(['error' => 'No pots enviar missatges a aquest usuari, perquè no sou amics'], 403);
             }
 
@@ -725,17 +760,17 @@ class UserController extends Controller
             $friend = User::getUserById($request->friendId);
 
             // Comprovem que el amic no sigui l'usuari autenticat
-            if ($friend->id == Auth::user()->id){
+            if ($friend->id == Auth::user()->id) {
                 return response()->json(['error' => 'No pots veure una conversació amb tu mateix'], 403);
             }
 
             // Si no és amic retornem un error
-            if (!User_friend::areFriends(Auth::user()->id, $friend->id)){
+            if (!User_friend::areFriends(Auth::user()->id, $friend->id)) {
                 return response()->json(['error' => 'No pots veure la conversació amb aquest usuari perquè no sou amics'], 403);
             }
             // Busquem els missatges de l'usuari amb l'usuari receptor
             $messages = User_message::getConversation(Auth::user()->id, $friend->id);
-            
+
             // Marquem els missatges com a llegits
             User_message::markAsRead(Auth::user()->id, $friend->id);
 
@@ -772,7 +807,7 @@ class UserController extends Controller
             $friend = User::getUserById($request->friendId);
 
             // Comprovem si els usuari són amics
-            if (User_friend::areFriends(Auth::user()->id, $friend->id) == false){
+            if (User_friend::areFriends(Auth::user()->id, $friend->id) == false) {
                 // Si no són amics retornem un error
                 return response()->json(['error' => 'No pots marcar els missatges com a llegits d\'aquest usuari'], 403);
             }
@@ -786,6 +821,173 @@ class UserController extends Controller
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Hi ha ocurregut un problema en el procés de marcar els missatges com a llegits, tornar a provar o prova-ho més tard'], 500);
+        }
+    }
+
+
+    /**
+     * Funció per actualitzar la imatge de perfil de l'usuari
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\JsonResponse Retorna un missatge en format JSON
+     * @throws \Exception Si hi ha algun error en el procés d'actualitzar la imatge de perfil
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    public function actualitzarImatgePerfil(Request $request)
+    {
+        try {
+            $request->validate(
+                [
+                    'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                ],
+                [
+                    'avatar.required' => 'La imatge és obligatoria',
+                    'avatar.image' => 'Has de seleccionar una imatge vàlida',
+                    'avatar.mimes' => "L'imatge ha de ser una imatge de tipus: jpeg, png, jpg, gif",
+                    'avatar.max' => "L'imatge ha de ser d'un màxim de 2MB",
+                ]
+            );
+
+            $user = User::getUserById(Auth::user()->id);
+
+            // Si l'usuari ja té una imatge de perfil i no es la default, l'esborrem
+            if (Str::contains($user->avatar, ['default', 'https://lh3.googleusercontent.com/a/']) == false) {
+                $nomImatge = explode('/', $user->avatar);
+                unlink(storage_path('app/public/avatars/' . end($nomImatge)));
+            }
+
+            // Guardem la imatge a la base de dades
+            $user->avatar = env('APP_URL') . '/' . 'storage/' . $request->file('avatar')->store('avatars', 'public');
+            $user->save();
+
+            // Retornem un missatge de confirmació
+            return redirect()->back()->with('success', 'Imatge de perfil actualitzada correctament');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'actualitzarImatgePerfil');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'actualitzar la imatge de perfil, tornar a provar o prova-ho més tard');
+        }
+    }
+
+
+    /**
+     * Funció per esborrar la imatge de perfil actual de l'usuari i posar la imatge per defecte
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina anterior
+     * @throws \Exception Si hi ha algun error en el procés d'esborrar la imatge de perfil
+     */
+    public function eliminarImatgePerfil()
+    {
+        try {
+            $user = User::getUserById(Auth::user()->id);
+
+            // Si l'usuari ja té una imatge de perfil i no es la default, l'esborrem
+            if (Str::contains($user->avatar, ['default', 'https://lh3.googleusercontent.com/a/']) == false) {
+                $nomImatge = explode('/', $user->avatar);
+                unlink(storage_path('app/public/avatars/' . end($nomImatge)));
+            }
+
+            // Guardem la imatge per defecte a la base de dades
+            $user->avatar = env('APP_URL') . '/storage/avatars/default.png';
+            $user->save();
+
+            // Retornem un missatge de confirmació
+            return redirect()->back()->with('success', 'Imatge de perfil eliminada correctament');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'eliminar la imatge de perfil, tornar a provar o prova-ho més tard');
+        }
+    }
+
+    /**
+     * Funció per a actualitzar les dades de l'usuari
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina anterior
+     * @throws \Exception Si hi ha algun error en el procés d'actualitzar les dades de l'usuari
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    public function actualitzarDades(Request $request)
+    {
+        try {
+            $request->validate(
+                [
+                    'username' => 'required|string|max:15|unique:users,username,' . Auth::user()->id,
+                    'description' => 'required|string|max:255|',
+                ],
+                [
+                    'username.required' => 'El camp nom d\'usuari és obligatori',
+                    'username.string' => 'El camp nom d\'usuari ha de ser una cadena de caràcters',
+                    'username.max' => 'El camp nom d\'usuari ha de tenir un màxim de 15 caràcters',
+                    'username.unique' => 'Aquest nom d\'usuari ja està registrat',
+                    'description.required' => 'El camp descripció és obligatori',
+                    'description.string' => 'El camp descripció ha de ser una cadena de caràcters',
+                    'description.max' => 'El camp descripció ha de tenir un màxim de 255 caràcters',
+                ]
+            );
+
+            // Actualitzem les dades de l'usuari
+            $user = User::getUserById(Auth::user()->id);
+            $user->username = $request->username;
+            $user->description = $request->description;
+            $user->save();
+
+            // Retornem un missatge de confirmació
+            return redirect()->back()->with('success', 'Dades actualitzades correctament');
+
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'actualitzarDades')->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'actualitzar les dades, tornar a provar o prova-ho més tard');}
+    }
+
+
+    /**
+     * Funció per a actualitzar la contrasenya de l'usuari
+     * @param Request $request Dades de la petició
+     * @return \Illuminate\Http\RedirectResponse Redirecciona a la pàgina anterior
+     * @throws \Exception Si hi ha algun error en el procés d'actualitzar la contrasenya de l'usuari
+     * @throws ValidationException Si hi ha algun error en la validació de les dades de la petició
+     */
+    public function actualitzarContrasenya(Request $request)
+    {
+        try {
+            $request->validate(
+                [
+                    'old_password' => 'required',
+                    'password' => 'required|min:6|max:25|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/|confirmed',
+                    'password_confirmation' => 'required',
+                ],
+                [
+                    'old_password.required' => 'El camp contrasenya actual és obligatori',
+                    'password.required' => 'El camp nova contrasenya és obligatori',
+                    'password.string' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.min' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.max' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.regex' => 'La contrasenya ha de tenir com a mínim 6 caràcters, un número, una lletra majúscula i una minúscula',
+                    'password.confirmed' => 'Les contrasenyes no coincideixen',
+                    'password_confirmation.required' => 'El camp confirmar contrasenya és obligatori',
+                ]
+            );
+            // Agafem les dades de l'usuari
+            $user = User::getUserById(Auth::user()->id);
+
+            // Comprovem si l'usuari té una contrasenya
+            if (!$user->password) {
+                return redirect()->back()->with('error', 'Aquest usuari no té permisos per a canviar la contrasenya');
+            }
+
+            // Comprovem si la contrasenya actual és correcta
+            if (!Hash::check($request->old_password, $user->password)) {
+                return redirect()->back()->withErrors(['old_password' => 'La contrasenya actual no és correcta'], 'actualitzarContrasenya');
+            }
+
+            // Actualitzem la contrasenya de l'usuari
+            $user->password = $request->password;
+            $user->save();
+
+            // Retornem un missatge de confirmació
+            return redirect()->back()->with('success', 'Contrasenya actualitzada correctament');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->getMessageBag(), 'actualitzarContrasenya');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'actualitzar la contrasenya, tornar a provar o prova-ho més tard');
         }
     }
 }

@@ -14,7 +14,7 @@
 
 </head>
 
-<body class="bg-body ">
+<body class="bg-body">
     <div id="body">
 
         <div class="shell">

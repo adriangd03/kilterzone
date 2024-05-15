@@ -1,23 +1,24 @@
 <div class="border border-end min-vh-100">
     <div class="p-2 d-flex flex-column min-vh-100">
-        <div class="d-flex justify-content-center mt-3 mb-4">
-            <span class=" fs-4 d-none d-sm-inline">KilterZone</span>
+        <div class="d-flex justify-content-center mt-3 mb-4 align-items-center">
+            <img src="{{ asset('KilterzoneLogo.png') }}" height="50px" width="50px" alt="logo de la web" />
+            <span class=" fs-4 d-none ms-1 d-sm-inline text-center align-items-center text-light"><span>KilterZone</span></span>
         </div>
         <ul class="nav nav-pills text-start flex-column">
-            <li class="nav-item py-2 py-sm-0 ">
-                <a class="nav-link text-dark " href="{{route('home')}}">
+            <li class="nav-item py-2 py-sm-0 user-hover ">
+                <a class="nav-link text-light " href="{{route('home')}}">
                     <i class="bi bi-house fs-4"></i>
                     <span class="fs-6 ms-1  d-sm-inline d-none">Inici</span>
                 </a>
             </li>
-            <li class="nav-item py-2  py-sm-0">
-                <a class="nav-link  text-dark" href="#">
+            <li class="nav-item py-2 py-sm-0 user-hover">
+                <a class="nav-link  text-light" href="#">
                     <i class="bi bi-search fs-4"></i>
                     <span class="fs-6 ms-1 d-none d-sm-inline">Buscar</span>
                 </a>
             </li>
-            <li class="nav-item py-2 py-sm-0">
-                <button class="nav-link position-relative  text-dark " data-bs-toggle="offcanvas" href="#offcanvasUsuaris" role="button" aria-controls="offcanvasUsuaris">
+            <li id="liUsuaris" class="nav-item py-2 py-sm-0 user-hover">
+                <button class="nav-link position-relative text-start w-100 h-100  text-light " data-bs-toggle="offcanvas" href="#offcanvasUsuaris" role="button" aria-controls="offcanvasUsuaris">
                     <i class="bi bi-person fs-4"></i>
                     <span class="fs-6 ms-1 d-none d-sm-inline">Usuaris</span>
                     @auth
@@ -29,8 +30,8 @@
                 </button>
             </li>
             @auth
-            <li class="nav-item py-2 py-sm-0">
-                <button class="nav-link position-relative  text-dark" data-bs-toggle="offcanvas" href="#offcanvasChat" role="button" aria-controls="offcanvasChat">
+            <li id="liXat" class="nav-item py-2 py-sm-0 user-hover">
+                <button class="nav-link position-relative w-100 h-100 text-start text-light" data-bs-toggle="offcanvas" href="#offcanvasChat" role="button" aria-controls="offcanvasChat">
                     <i class="bi bi-chat-left fs-4"></i>
                     <span class="fs-6 ms-1 d-none d-sm-inline">Xat i Amics</span>
                     @auth
@@ -43,14 +44,14 @@
             </li>
             @endauth
             @guest
-            <li class="nav-item py-2 py-sm-0">
-                <a class="nav-link  text-dark" href="{{ route('login') }}">
+            <li class="nav-item py-2 py-sm-0 user-hover">
+                <a class="nav-link  text-light" href="{{ route('login') }}">
                     <i class="bi bi-box-arrow-in-right fs-4"></i>
                     <span class="fs-6 ms-1 d-none d-sm-inline">Inicia Sessió</span>
                 </a>
             </li>
-            <li class="nav-item py-2 py-sm-0">
-                <a class="nav-link  text-dark" href="{{ route('registre') }}">
+            <li class="nav-item py-2 py-sm-0 user-hover">
+                <a class="nav-link  text-light" href="{{ route('registre') }}">
                     <i class="bi bi-person-plus fs-4"></i>
                     <span class="fs-6 ms-1 d-none d-sm-inline">Registra't</span>
                 </a>
@@ -60,7 +61,7 @@
         @auth
         <input type="hidden" id="userId" value="{{ Auth::user()->id }}">
 
-        <ul class="navbar-nav ms-1 text-bottom mt-auto mb-1 p-1 align-items-bottom">
+        <ul class="navbar-nav ms-1 text-bottom mt-auto mb-1 p-1 align-items-bottom user-hover text-light">
             <li class="nav-item dropdown no-arrow">
                 <div class="nav-item dropdown no-arrow">
                     <a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#">

@@ -1,10 +1,11 @@
 
-import { form,  userId, receiver, offCanvas, channel, channel2 } from './constantChatFriends.js';
+import { form,  userId, receiver, offCanvasChat, offCanvasUsuaris ,channel, channel2 } from './constantChatFriends.js';
 import notificacions from './notificacions.js';
 import { seleccionarUsuari } from "./friends";
 import friends from './friends.js';
 import missatges from './chat.js';
 import toastAlerts from './alerts.js';
+import { Offcanvas } from 'bootstrap';
 
 var chatFriends = $(function () {
     // Assignar el valor 0 al receiver input
@@ -22,6 +23,44 @@ var chatFriends = $(function () {
             e.preventDefault();
         }
     });
+
+    offCanvasChat.addEventListener('show.bs.offcanvas', () => {
+        // Afegir la classe active al li del xat
+        $('#liXat').addClass('active');
+        // Treure la classe active del li de usuaris
+        $('#liUsuaris').removeClass('active');
+    });
+
+    offCanvasChat.addEventListener('hidden.bs.offcanvas', () => {
+        // Treure la classe active al li del xat
+        $('#liXat').removeClass('active');
+    });
+
+    offCanvasUsuaris.addEventListener('show.bs.offcanvas', () => {
+        // Afegir la classe active al li de usuaris
+        $('#liUsuaris').addClass('active');
+        // Treure la classe active del li de xat
+        $('#liXat').removeClass('active');
+    });
+
+    offCanvasUsuaris.addEventListener('hidden.bs.offcanvas', () => {
+        // Treure la classe active al li de usuaris
+        $('#liUsuaris').removeClass('active');
+    });
+
+
+    // $('#offcanvasChat').on('show.bs.offcanvas', () => {
+    //     console.log('show');
+
+        
+
+    //     // Afegir la classe active al li del xat
+    //     $('#liXat').addClass('active');
+    //     // Treure la classe active del li de usuaris
+    //     $('#liUsuaris').removeClass('active');
+    // });
+        
+
 
     // Listener del input de missatge
     $('#message').on('keyup', (e) => {

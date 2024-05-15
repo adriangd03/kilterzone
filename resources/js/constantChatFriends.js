@@ -10,7 +10,9 @@ export const authUserAvatar = document.getElementById("user_avatar").src;
 // Constant del receiver input del xat
 export const receiver = document.getElementById("receiver");
 // Constant del offcanvas del xat
-export const offCanvas = document.getElementById("offcanvasChat");
+export const offCanvasChat = document.getElementById("offcanvasChat");
+// Constant del offcanvas d'usuari
+export const offCanvasUsuaris = document.getElementById("offcanvasUsuaris");
 // Constant del div de toasts
 export const divToasts = document.getElementById("divToasts");
 // Constant del badge de notificacions

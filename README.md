@@ -2,12 +2,6 @@
 - Acabar wireframe
 - Mockup
 
-- Configuració
-    - Modificar nom, avatar i contraseya
-    - Modificar perfil
-- Estil 
-    - Escollir colors
-    - Escollir com serà el chat
 - Rutes
 - Busqueda de rutas y usuarios
     - Mejorar el diseño del dropdown y añadir busqueda de usuarios

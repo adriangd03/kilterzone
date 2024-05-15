@@ -1,9 +1,35 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
+
+/* Main colors variables */
+:root {
+    --main-bg-color: #676767;
+    --main-text-color: #000;
+    --primary-color: #04A8C4;
+    --secondary-color: #027592;
+    --tertiary-color: #ED3300;
+    --secondary-bg-color: #011F27;
+}
+
 body {
     background-color: #f0f0f0;
     font-family: "Nunito", sans-serif;
+}
+
+.bg-body {
+    background-color: #f0f0f0 !important; 
+}
+
+.card {
+    background-color:#f0f0f0;
+}
+
+.offcanvas .card {
+    background-color: #ffffff;
+}
+.offcanvas .user-hover:hover {
+    background-color: #f0f0f0;
 }
 
 .shell {
@@ -12,6 +38,10 @@ body {
     position: relative;
     width: 100%;
     min-height: 100%;
+}
+
+.active{
+    background-color: var(--secondary-color);
 }
 
 #left{
@@ -25,6 +55,7 @@ body {
     min-height:100vh;
     height: 100vh;
     width:20%;
+    background-color: var(--secondary-bg-color);
 }
 
 #body {
@@ -86,7 +117,7 @@ body {
 }
 
 .user-hover:hover {
-    background-color: #f0f0f0;
+    background-color: var(--primary-color);
 }
 
 .content {

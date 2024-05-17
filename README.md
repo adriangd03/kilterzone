@@ -1,11 +1,10 @@
 # ToDo
 - Acabar wireframe
 - Mockup
-
 - Rutes
+    - svg funcional
 - Busqueda de rutas y usuarios
-    - Mejorar el diseño del dropdown y añadir busqueda de usuarios
-- Que hacer con los formularios si el javascript no funciona o algo.
+    - Añadir busqueda de usuarios
 
 
 
@@ -20,7 +19,7 @@
     - Registre normal i amb Oauth de google
 - Configuració
     - Canviar imatge de avatar, nom de usuari, contrasenya.
-    - Configuració de la privacitat. Si tots els usuaris poden obrir chat amb tú
+    - Configuració de la privacitat.
 - Perfil de altres usuaris
     - Veure la seva imatge de perfil, biografía, rutes creades per ell, rutes que li han agradat i ha marcat com fet.
     - Começar a seguir/Afegir com amic.

@@ -55,7 +55,7 @@ class UserController extends Controller
             return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar la pàgina principal retornem un error
-            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' . $e);
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard');
             return view('home', compact('friends',  'notFriends', 'friendRequests', 'totalFriendRequests', 'totalUnreadMessages',));
         }
     }
@@ -990,4 +990,6 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'actualitzar la contrasenya, tornar a provar o prova-ho més tard');
         }
     }
+
+
 }

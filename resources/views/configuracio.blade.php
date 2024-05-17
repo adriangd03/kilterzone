@@ -111,7 +111,7 @@
                     <button id="btnEliminarAvatar" type="submit" class="btn rounded-0 text-danger w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0">Eliminar imatge actual</button>
                 </form>
                 
-                <button type="button" class="btn rounded-0  w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
+                <button type="button" class="btn rounded-top-0 w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
                 <form id="formAvatar" method="POST" action="{{ route('actualitzarImatgePerfil') }}" enctype="multipart/form-data">
                     @csrf
                     <input type="file" id="avatar" name="avatar" class="d-none">

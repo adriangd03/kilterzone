@@ -1,10 +1,10 @@
 
-import { form,  userId, receiver, offCanvasChat, offCanvasUsuaris ,channel, channel2 } from './constantChatFriends.js';
-import notificacions from './notificacions.js';
-import { seleccionarUsuari } from "./friends";
-import friends from './friends.js';
-import missatges from './chat.js';
-import toastAlerts from './alerts.js';
+import { form, userId, receiver, offCanvasChat, offCanvasUsuaris, channel, channel2 } from './modules/constantChatFriends.js';
+import notificacions from './modules/notificacions.js';
+import { seleccionarUsuari } from "./modules/friends.js";
+import friends from './modules/friends.js';
+import missatges from './modules/chat.js';
+import toastAlerts from './modules/alerts.js';
 import { Offcanvas } from 'bootstrap';
 
 var chatFriends = $(function () {
@@ -49,17 +49,6 @@ var chatFriends = $(function () {
     });
 
 
-    // $('#offcanvasChat').on('show.bs.offcanvas', () => {
-    //     console.log('show');
-
-        
-
-    //     // Afegir la classe active al li del xat
-    //     $('#liXat').addClass('active');
-    //     // Treure la classe active del li de usuaris
-    //     $('#liUsuaris').removeClass('active');
-    // });
-        
 
 
     // Listener del input de missatge
@@ -83,10 +72,6 @@ var chatFriends = $(function () {
         });
     });
 
-    // Listener del dropdown per evitar que es tanqui al clicar dins
-    $('#users-dropdown').on('click', (e) => {
-        e.stopPropagation();
-    });
 
     // Listener del boto de sol·licitud d'amistat
     $('[name="formSolAmic"]').on('submit', friends.enviarSolAmic);
@@ -99,6 +84,8 @@ var chatFriends = $(function () {
 
     // Listener del formulari de eliminar amic 
     $('#formEliminarAmic').on('submit', friends.eliminarAmic);
+
+    $('#searchUser').on('keyup', friends.cercarUsuari);
 
 
 
@@ -119,7 +106,6 @@ var chatFriends = $(function () {
                 // Si no es el mateix usuari, mostrar la notificació
                 notificacions.sumarNotificacionsUser(event.user.id);
             }
-
             // Afegir el missatge a la variable messages
             if (missatges.messages[event.user.id]) {
                 missatges.messages[event.user.id].messages.push({
@@ -143,7 +129,7 @@ var chatFriends = $(function () {
             friends.mostrarNouAmic(event.user, $('#amics'));
 
             $(`#solAmic-${event.user.id}`).remove();
-            
+
             // Restar una notificació de sol·licitud d'amistat
             notificacions.restarSolAmics();
             console.log("event", event);

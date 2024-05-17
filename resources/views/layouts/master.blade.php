@@ -11,6 +11,10 @@
     @include('partials.scripts')
     @yield('styles')
     @yield('scripts')
+    
+    @auth
+    @vite('resources/js/chatFriends.js')
+    @endauth
 
 </head>
 
@@ -19,7 +23,7 @@
 
         <div class="shell">
 
-            <div id="left" class="fixed-start">
+            <div id="left" >
                 @include('partials.sidebar')
             </div>
             <div id="mid" style="min-width: 0;">

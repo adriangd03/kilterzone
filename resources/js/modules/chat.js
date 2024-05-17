@@ -174,12 +174,12 @@ var missatges = {
 
         const formData = new FormData(form);
 
-        if (formData.get("message").trim() == "") {
-            xatAlerts.mostrarErrors("El missatge no pot estar buit");
-            return;
-        }
         if (formData.get("receiver") == 0) {
             xatAlerts.mostrarErrors("Selecciona un usuari per enviar el missatge");
+            return;
+        }
+        if (formData.get("message").trim() == "") {
+            xatAlerts.mostrarErrors("El missatge no pot estar buit");
             return;
         }
 

@@ -33,8 +33,10 @@
                         <div class="tab-content" id="usersTabContent">
                             <div class="tab-pane fade show active" id="usuaris" role="tabpanel" aria-labelledby="usuaris-tab">
                                 <div class="card">
-                                    <div class="card-header">
+                                    <div class="card-header d-flex">
                                         <h4>Usuaris</h4>
+                                        <input type="text" class="form-control ms-auto w-25" id="searchUser" name="searchUser" placeholder="Cerca usuari">
+
                                     </div>
                                     <div class="card-body h-100 mh-100 ">
                                         <div id="users" class="users-list row mh-100 p-3">

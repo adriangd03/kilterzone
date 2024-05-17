@@ -18,16 +18,6 @@
                 @error('error', 'login')
                 <div class="alert alert-danger mt-2">{{ $message }}</div>
                 @enderror
-
-                @if (session('error'))
-                <div class="alert alert-danger mt-2">{{ session('error') }}</div>
-
-                @endif
-
-                @if (session('success'))
-                <div class="alert alert-success mt-2">{{ session('success') }}</div>
-                @endif
-
                 <div class="card-body">
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
@@ -109,8 +99,7 @@
                 <h5 class="modal-title" id="modalRecuperarLabel">Recuperar contrasenya</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body
-                            ">
+            <div class="modal-body">
                 <form method="POST" action="{{ route('recuperar') }}">
                     @csrf
                     <div class="mb-3">
@@ -124,9 +113,9 @@
                         <div class="alert alert-danger mt-2" name="error">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="d-grid gap
-                                    -2">
+                    <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary">Recuperar contrasenya</button>
+                    </div>
 
                 </form>
 

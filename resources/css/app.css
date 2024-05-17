@@ -28,9 +28,40 @@ body {
 .offcanvas .card {
     background-color: #ffffff;
 }
+
 .offcanvas .user-hover:hover {
     background-color: #f0f0f0;
 }
+
+.offcanvas{
+    background-color: #f0f0f0;
+}
+
+.tab-content .card {
+    border-radius: 0;
+}
+
+.rounded-top-0 {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.climbing-board {
+    background-color: #f0f0f0;
+    width: 540px;
+    height: 540px;
+}
+
+path:hover {
+    fill: var(--primary-color);
+}
+
+g{
+    width: 540px;
+    height: 540px;
+}
+
+
 
 .shell {
     display: flex;
@@ -56,6 +87,7 @@ body {
     height: 100vh;
     width:20%;
     background-color: var(--secondary-bg-color);
+    
 }
 
 #body {

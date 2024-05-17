@@ -27,7 +27,7 @@
                                 </div>
                                
                                 <div class="col">
-                                    <a href="" class="btn btn-secondary">Editar perfil</a>
+                                    <a href="{{route('configuracio')}}" class="btn btn-secondary">Editar perfil</a>
     
                                 </div>
                             </div>

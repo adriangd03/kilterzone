@@ -42,6 +42,9 @@ var xatAlerts = {
         let errorDiv = $('<div>', { class: "alert alert-danger alert-dismissible fade show", role: "alert" });
         errorDiv.append(`<strong>Error!</strong> ${error}`);
         errorDiv.append(`<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`);
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
         return errorDiv;
     },
     /**

@@ -296,7 +296,28 @@ var friends = {
                 console.error(error);
                 toastAlerts.mostrarErrors(error.response.data.error, $(divToasts));
             });
-    }
+    },
+    /**
+     * Funció per cercar un usuari
+     * @param {object} e Event del teclat
+     */
+    cercarUsuari: function (e) {
+        const search = $(e.target).val();
+        if (search.length < 3) {
+            return;
+        }
+        axios
+            .get(`/cercarUsuari/${search}`)
+            .then((response) => {
+                $('#users').html("");
+                response.data.users.forEach((user) => {
+                    friends.mostrarNouUsuariNoAmic(user);
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+                toastAlerts.mostrarErrors(error.response.data.error, $(divToasts));
+            });}
 };
 
 export default friends;

@@ -1,7 +1,7 @@
-<div class="border border-end min-vh-100">
+<div class=" min-vh-100">
     <div class="p-2 d-flex flex-column min-vh-100">
         <div class="d-flex justify-content-center mt-3 mb-4 align-items-center">
-            <img src="{{ asset('KilterzoneLogo.png') }}" height="50px" width="50px" alt="logo de la web" />
+            <img src="{{ asset('img/KilterzoneLogo.png') }}" height="50px" width="50px" alt="logo de la web" />
             <span class=" fs-4 d-none ms-1 d-sm-inline text-center align-items-center text-light"><span>KilterZone</span></span>
         </div>
         <ul class="nav nav-pills text-start flex-column">
@@ -42,6 +42,14 @@
                     @endauth
                 </button>
             </li>
+
+            <li class="nav-item py-2 py-sm-0 user-hover">
+                <a class="nav-link  text-light" href="{{ route('crearRuta') }}">
+                    <i class="bi bi-plus-circle fs-4"></i>
+                    <span class="fs-6 ms-1 d-none d-sm-inline">Crear ruta</span>
+                </a>
+            </li>
+            
             @endauth
             @guest
             <li class="nav-item py-2 py-sm-0 user-hover">

@@ -1,6 +1,4 @@
 
-import chatFriends from "./chatFriends";
-
 $(function() {
     $('#btnAvatar').on('click', function() {
         $('#avatar').trigger('click');

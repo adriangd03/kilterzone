@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RutaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -65,4 +66,12 @@ Route::post('eliminarImatgePerfil', [UserController::class, 'eliminarImatgePerfi
 Route::post('actualitzarDades', [UserController::class, 'actualitzarDades'])->name('actualitzarDades')->middleware('auth');
 
 Route::post('actualitzarContrasenya', [UserController::class, 'actualitzarContrasenya'])->name('actualitzarContrasenya')->middleware('auth');
+
+Route::get('rutes', [UserController::class, 'rutes'])->name('rutes');
+
+Route::get('rutes/{id}', [UserController::class, 'ruta'])->name('ruta');
+
+Route::get('crearRuta', [RutaController::class, 'crearRutaView'])->name('crearRuta')->middleware('auth');
+
+Route::post('crearRuta', [RutaController::class, 'crearRuta'])->name('crearRuta')->middleware('auth');
 

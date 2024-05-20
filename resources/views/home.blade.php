@@ -10,11 +10,4 @@
 @section('content')
 
 
-
-
-
-
-
-
-
 @endsection

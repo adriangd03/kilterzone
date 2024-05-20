@@ -1,3 +1,4 @@
+import toastAlerts from "./modules/alerts";
 let peces = [];
 let start = 0;
 let end = 0;
@@ -81,8 +82,44 @@ $(function () {
             })
             .catch(function (error) {
                 console.log(error);
-                console.log(error.response.data.errors);
+                console.log(error.response.data.error);
+
+                // Esborrar els errors anteriors
+                $('.alert').addClass('d-none');
+                $('.form-control').removeClass('is-invalid');
+
+                // Mostrar els errors
+                if(typeof error.response.data.error === 'string'){
+                    toastAlerts.mostrarToast('danger', error.response.data.error);
+                    return;
+                }
+                for(let err in error.response.data.error){
+                    $(`#${err}Alert`).removeClass('d-none').text(error.response.data.error[err]);
+                    $(`#${err}`).addClass('is-invalid');
+                }
+
             });
     });
+
+
+    // axios.interceptors.request.use(function (config) {
+
+    //     config.metadata = { startTime: new Date() }
+    //     return config;
+    // }, function (error) {
+    //     return Promise.reject(error);
+    // });
+
+
+    // axios.interceptors.response.use(function (response) {
+
+    //     response.config.metadata.endTime = new Date()
+    //     response.duration = response.config.metadata.endTime - response.config.metadata.startTime
+    //     return response;
+    // }, function (error) {
+    //     error.config.metadata.endTime = new Date();
+    //     error.duration = error.config.metadata.endTime - error.config.metadata.startTime;
+    //     return Promise.reject(error);
+    // });
 
 });

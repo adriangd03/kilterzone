@@ -2,9 +2,18 @@
 - Acabar wireframe
 - Mockup
 - Rutes
-    - svg funcional
+    - push
+    - crear el resto de svg
+    - Limpiar los svgs
+    - Afegir a la creacióde rutes els nous svgs
+    - Afegir les noves comprobacions
+    - Vista de ruta 
+    - Vista en el home de rutas populares y de amigos
+    - Ver tus rutas 
+    - Ver las rutas de otros usuarios en su perfil
 - Busqueda de rutas y usuarios
     - Añadir busqueda de usuarios
+
 
 
 

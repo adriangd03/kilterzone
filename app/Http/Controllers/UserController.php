@@ -18,6 +18,7 @@ use App\Events\AcceptFriendRequest;
 use App\Events\RemoveFriend;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User_ruta;
 
 
 
@@ -50,9 +51,10 @@ class UserController extends Controller
             $totalUnreadMessages = $chatData['totalUnreadMessages'];
             $totalFriendRequests = $chatData['totalFriendRequests'];
 
+            $rutes = User_ruta::all();
 
             // Retornem la vista de la pàgina principal
-            return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
+            return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests', 'rutes'));
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar la pàgina principal retornem un error
             session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard');

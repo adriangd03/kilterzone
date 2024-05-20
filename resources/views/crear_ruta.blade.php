@@ -35,14 +35,15 @@
 
                                     <div class="col">
                                         <label for="layout" class="form-label">Layout</label>
-                                        <select class="form-select" id="layout" name="layout" required>
+                                        <select class="form-select" id="layout" name="layout" >
                                             <option value="homeWall">Kilter Board Home Wall</option>
                                             <option value="original">Kilter Board Original</option>
                                         </select>
+                                        <div class="d-none alert alert-danger mt-2" id="layoutAlert"></div>
                                     </div>
                                     <div class="col">
                                         <label for="size" class="form-label">Mida de la paret</label>
-                                        <select class="form-select" id="size" name="size" required>
+                                        <select class="form-select" id="size" name="size" >
                                             <option value="7x10FullRideLedKit">7x10 Full ride LED Kit</option>
                                             <option value="7x10MainlineLedKit">7x10 Mainline LED Kit</option>
                                             <option value="7x10AuxliaryLedKit">7x10 Auxliary LED Kit</option>
@@ -54,6 +55,7 @@
                                             <option value="10x12FullrideLedKit">10x12 Full ride LED Kit</option>
                                             <option value="10x12MainlineLedKit">10x12 Mainline LED Kit</option>
                                         </select>
+                                        <div class="d-none alert alert-danger mt-2" id="sizeAlert"></div>
                                     </div>
                                 </div>
 
@@ -68,17 +70,19 @@
                                         <label for="auxiliary" class="form-check-label">Auxiliary</label>
 
                                     </div>
+                                    <div class="d-none alert alert-danger mt-2" id="lineAlert"></div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="nom" class="form-label">Nom de la ruta</label>
-                                    <input type="text" class="form-control" id="nom" name="nom" required>
+                                    <input type="text" class="form-control" id="nom" name="nom" >
+                                    <div class="d-none alert alert-danger mt-2" id="nomAlert"></div>
                                 </div>
                                 <div class="row">
 
                                     <div class="col">
                                         <label for="dificultat" class="form-label">Grau de la ruta</label>
-                                        <select class="form-select" id="dificultat" name="dificultat" required>
+                                        <select class="form-select" id="dificultat" name="dificultat" >
                                             <option value="4a">4a</option>
                                             <option value="4b">4b</option>
                                             <option value="4c">4c</option>
@@ -104,10 +108,11 @@
                                             <option value="8c">8c</option>
                                             <option value="8c">8c+</option>
                                         </select>
+                                        <div class="d-none alert alert-danger mt-2" id="dificultatAlert"></div>
                                     </div>
                                     <div class="col">
                                         <label for="inclinacio" class="form-label">Inclinació de la paret</label>
-                                        <select class="form-select" id="inclinacio" name="inclinacio" required>
+                                        <select class="form-select" id="inclinacio" name="inclinacio" >
                                             <option value="0º">0º</option>
                                             <option value="5º">5º</option>
                                             <option value="10º">10º</option>
@@ -124,12 +129,14 @@
                                             <option value="65º">65º</option>
                                             <option value="70º">70º</option>
                                         </select>
+                                        <div class="d-none alert alert-danger mt-2" id="inclinacioAlert"></div>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="descripcio" class="form-label">Descripció de la ruta</label>
-                                    <textarea class="form-control" id="descripcio" name="descripcio" rows="3" required></textarea>
+                                    <textarea class="form-control" id="descripcio" name="descripcio" rows="3" ></textarea>
+                                    <div class="d-none alert alert-danger mt-2" id="descripcioAlert"></div>
                                 </div>
                                 <div class="row text-center">
                                     <button type="submit" class="btn btn-primary w-0 ">Crear ruta</button>

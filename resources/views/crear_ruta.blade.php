@@ -19,23 +19,25 @@
             <div class="card border-0">
                 <div class="card-body">
                     <!-- div for the svg of the climbing board -->
-                    <div class="d-flex ">
+                    <div class="d-flex row ">
                         <div class="d-flex col-md col-sm-12">
 
-                            <div id="climbingBoard" class="climbing-board">
-                                <!-- add svg -->
-                                @include('partials.kilterboard')
+                            <div id="climbingBoard" class="svg-container ">
+                                <!-- Afegim els svgs dels kilterboards -->
+                                @include('partials.kilterboards.7x10-full-ride-led-kit-kilter-board-home-wall-mainline')
+                                @include('partials.kilterboards.7x10-full-ride-led-kit-kilter-board-home-wall-auxiliary')
+                                @include('partials.kilterboards.7x10-full-ride-led-kit-kilter-board-home-wall-mainline-auxiliary')
 
 
                             </div>
                         </div>
-                        <div class="d-flex col">
+                        <div class="d-flex col-md col-sm-12">
                             <form id="formCrearRuta" action="">
                                 <div class="row mb-3">
 
                                     <div class="col">
                                         <label for="layout" class="form-label">Layout</label>
-                                        <select class="form-select" id="layout" name="layout" >
+                                        <select class="form-select" id="layout" name="layout">
                                             <option value="homeWall">Kilter Board Home Wall</option>
                                             <option value="original">Kilter Board Original</option>
                                         </select>
@@ -43,7 +45,7 @@
                                     </div>
                                     <div class="col">
                                         <label for="size" class="form-label">Mida de la paret</label>
-                                        <select class="form-select" id="size" name="size" >
+                                        <select class="form-select" id="size" name="size">
                                             <option value="7x10FullRideLedKit">7x10 Full ride LED Kit</option>
                                             <option value="7x10MainlineLedKit">7x10 Mainline LED Kit</option>
                                             <option value="7x10AuxliaryLedKit">7x10 Auxliary LED Kit</option>
@@ -75,14 +77,14 @@
 
                                 <div class="mb-3">
                                     <label for="nom" class="form-label">Nom de la ruta</label>
-                                    <input type="text" class="form-control" id="nom" name="nom" >
+                                    <input type="text" class="form-control" id="nom" name="nom">
                                     <div class="d-none alert alert-danger mt-2" id="nomAlert"></div>
                                 </div>
                                 <div class="row">
 
                                     <div class="col">
                                         <label for="dificultat" class="form-label">Grau de la ruta</label>
-                                        <select class="form-select" id="dificultat" name="dificultat" >
+                                        <select class="form-select" id="dificultat" name="dificultat">
                                             <option value="4a">4a</option>
                                             <option value="4b">4b</option>
                                             <option value="4c">4c</option>
@@ -112,7 +114,7 @@
                                     </div>
                                     <div class="col">
                                         <label for="inclinacio" class="form-label">Inclinació de la paret</label>
-                                        <select class="form-select" id="inclinacio" name="inclinacio" >
+                                        <select class="form-select" id="inclinacio" name="inclinacio">
                                             <option value="0º">0º</option>
                                             <option value="5º">5º</option>
                                             <option value="10º">10º</option>
@@ -135,7 +137,7 @@
 
                                 <div class="mb-3">
                                     <label for="descripcio" class="form-label">Descripció de la ruta</label>
-                                    <textarea class="form-control" id="descripcio" name="descripcio" rows="3" ></textarea>
+                                    <textarea class="form-control" id="descripcio" name="descripcio" rows="3"></textarea>
                                     <div class="d-none alert alert-danger mt-2" id="descripcioAlert"></div>
                                 </div>
                                 <div class="row text-center">

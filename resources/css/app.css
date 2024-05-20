@@ -46,21 +46,25 @@ body {
     border-top-right-radius: 0;
 }
 
-.climbing-board {
-    background-color: #f0f0f0;
-    width: 540px;
-    height: 540px;
-}
 
 path:hover {
     fill: var(--primary-color);
 }
 
-g{
-    width: 540px;
-    height: 540px;
+.svg-container {
+    width: 100%;
+    height: 0;
+    padding-bottom: 133.33%; /* This preserves the aspect ratio (800 / 600 = 1.3333 or 133.33%) */
+    position: relative;
 }
 
+.svg-container svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
 
 
 .shell {
@@ -69,6 +73,7 @@ g{
     position: relative;
     width: 100%;
     min-height: 100%;
+    
 }
 
 .active{

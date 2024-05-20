@@ -2,7 +2,6 @@
 - Acabar wireframe
 - Mockup
 - Rutes
-    - push
     - crear el resto de svg
     - Limpiar los svgs
     - Afegir a la creacióde rutes els nous svgs

@@ -4,8 +4,8 @@
 - Rutes
     - crear el resto de svg
     - Limpiar los svgs
-    - Afegir a la creacióde rutes els nous svgs
     - Afegir les noves comprobacions
+    - Tener en cuenta que habra rutas que es podrán haer en más de un modelo
     - Vista de ruta 
     - Vista en el home de rutas populares y de amigos
     - Ver tus rutas 

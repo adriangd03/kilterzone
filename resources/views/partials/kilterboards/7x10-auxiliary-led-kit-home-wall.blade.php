@@ -1,4 +1,4 @@
-<svg version="1.1" name="7x10FullRideLedKitKilterBoardHomeWallAuxiliary" class="d-none" viewBox="0 0 1200 1800" sodipodi:docname="Screenshot_2024-05-20-17-38-54-479_com.auroraclimbing.kilterboard.jpg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+<svg version="1.1" name="7x10AuxiliaryLedKitHomeWall" class="d-none" viewBox="0 0 1200 1800" sodipodi:docname="Screenshot_2024-05-20-17-38-54-479_com.auroraclimbing.kilterboard.jpg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
     <defs id="defs947" />
     <sodipodi:namedview  pagecolor="#ffffff" bordercolor="#000000" borderopacity="0.25" inkscape:showpageshadow="2" inkscape:pageopacity="0.0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#d1d1d1" showgrid="false" />
     <g inkscape:groupmode="layer" inkscape:label="Image">

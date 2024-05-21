@@ -49,9 +49,8 @@ class RutaController extends Controller
      */
     public function crearRuta(Request $request)
     {
-        $wall = HomeWallController::homeWall7x10fullRideLedKit();
         try {
-
+            
             $request->validate([
                 'nom' => 'required|string|max:45|unique:user_ruta,nom_ruta',
                 'descripcio' => 'required|string|max:255',
@@ -59,8 +58,8 @@ class RutaController extends Controller
                 'dificultat' => 'required|in:4a,4b,4c,5a,5b,5c,6a,6a+,6b,6b+,6c,6c+,7a,7a+,7b,7b+,7c,7c+,8a,8a+,8b,8b+,8c,8c+',
                 'peces' => 'required',
                 'layout' => 'required|in:homeWall,original',
-                'size' => 'required|in:7x10FullRideLedKit,7x10MainlineLedKit,7x10AuxliaryLedKit,10x10FullRideLedKit,10x10MainlineLedKit,10x10AuxliaryLedKit,8x12FullrideLedKit,8x12MainlineLedKit,10x12FullRideLedKit,10x12MainlineLedKit',
-
+                'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,10x10MainlineLedKitHomeWall,10x10AuxliaryLedKitHomeWall,8x12FullrideLedKitHomeWall,8x12MainlineLedKitHomeWall,10x12FullrideLedKitHomeWall,10x12MainlineLedKitHomeWall',
+                
             ], [
                 'nom.required' => 'El nom de la ruta és obligatori',
                 'nom.string' => 'El nom de la ruta ha de ser un text',
@@ -79,6 +78,13 @@ class RutaController extends Controller
                 'size.required' => 'La mida de la ruta és obligatòria',
                 'size.in' => 'La mida de la ruta no és vàlida',
             ]);
+            
+            if($request->layout === 'homeWall'){
+
+                $wall = HomeWallController::getSvg($request->size);
+
+            }
+
 
             $peces = json_decode($request->peces);
 
@@ -139,7 +145,7 @@ class RutaController extends Controller
             $ruta->descripcio = $request->descripcio;
             $ruta->dificultat = $request->dificultat;
             $ruta->inclinacio = $request->inclinacio;
-            $ruta->layout = $request->layout;
+            $ruta->layout = $request->layout . ' ' . $request->size;
             $ruta->save();
 
             // TODO redirigir a vista de la ruta creada

@@ -2,11 +2,72 @@ import toastAlerts from "./modules/alerts";
 let peces = [];
 let start = 0;
 let end = 0;
+let layout = $('#layout').val();
+let wall = $('#size').val();
+const homeWallSizes = {
+    '7x10FullRideLedKitHomeWall': {
+        'svg': $('[name="7x10FullRideLedKitHomeWall"]'),
+    },
+    '7x10MainlineLedKitHomeWall': {
+        'svg': $('[name="7x10MainlineLedKitHomeWall"]'),
+    },
+    '7x10AuxiliaryLedKitHomeWall': {
+        'svg': $('[name="7x10AuxiliaryLedKitHomeWall"]'),
+    },
+    '10x10FullRideLedKitHomeWall': {
+        'svg': $('[name="10x10FullRideLedKitHomeWall"]'),
+    },
+    '10x10MainlineLedKitHomeWall': {
+        'svg': $('[name="10x10MainlineLedKitHomeWall"]'),
+    },
+    '10x10AuxiliaryLedKitHomeWall': {
+        'svg': $('[name="10x10AuxiliaryLedKitHomeWall"]'),
+    },
+};
 
 $(function () {
 
-    $('#auxiliary').prop('checked', false);
-    $('#mainline').prop('checked', true);
+    // comprovar si el layout es homeWall
+    if (layout === 'homeWall') {
+        console.log('homeWall');
+        // Comprovem el valor de la variable wall per mostrar el svg correcte de homeWallSizes
+        switch (wall) {
+            case '7x10FullRideLedKitHomeWall':
+                homeWallSizes['7x10FullRideLedKitHomeWall']['svg'].removeClass('d-none');
+                break;
+            case '7x10MainlineLedKitHomeWall':
+                homeWallSizes['7x10MainlineLedKitHomeWall']['svg'].removeClass('d-none');
+                break;
+            case '7x10AuxiliaryLedKitHomeWall':
+                homeWallSizes['7x10AuxiliaryLedKitHomeWall']['svg'].removeClass('d-none');
+                break;
+            case '10x10FullRideLedKitHomeWall':
+                homeWallSizes['10x10FullRideLedKitHomeWall']['svg'].removeClass('d-none');
+                break;
+            case '10x10MainlineLedKitHomeWall':
+                homeWallSizes['10x10MainlineLedKitHomeWall']['svg'].removeClass('d-none');
+                break;
+            case '10x10AuxiliaryLedKitHomeWall':
+                homeWallSizes['10x10AuxiliaryLedKitHomeWall']['svg'].removeClass('d-none');
+                break;
+            
+            
+        }
+    }
+
+
+    $('#size').on('change', function () {
+        $(`[name="${wall}"]`).addClass('d-none');
+        wall = $(this).val();
+        $(`[name="${wall}"]`).removeClass('d-none');
+        // Unselect all the paths
+        $('path').css('stroke', 'black');
+        start = 0;
+        end = 0;
+        peces = [];
+    });
+
+
 
     //We add a listener to all the paths of the svg
     $('path').on('click', function () {
@@ -89,11 +150,11 @@ $(function () {
                 $('.form-control').removeClass('is-invalid');
 
                 // Mostrar els errors
-                if(typeof error.response.data.error === 'string'){
+                if (typeof error.response.data.error === 'string') {
                     toastAlerts.mostrarToast('danger', error.response.data.error);
                     return;
                 }
-                for(let err in error.response.data.error){
+                for (let err in error.response.data.error) {
                     $(`#${err}Alert`).removeClass('d-none').text(error.response.data.error[err]);
                     $(`#${err}`).addClass('is-invalid');
                 }

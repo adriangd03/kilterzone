@@ -24,12 +24,34 @@
 
                             <div id="climbingBoard" class="svg-container ">
                                 <!-- Afegim els svgs dels kilterboards -->
-                                @include('partials.kilterboards.7x10-mainline-led-kit-home-wall')
-                                @include('partials.kilterboards.7x10-auxiliary-led-kit-home-wall')
-                                @include('partials.kilterboards.7x10-full-ride-led-kit-home-wall')
-                                @include('partials.kilterboards.10x10-full-ride-led-kit-home-wall')
-                                @include('partials.kilterboards.10x10-mainline-led-kit-home-wall')
-                                @include('partials.kilterboards.10x10-auxiliary-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.7x10-mainline-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.7x10-auxiliary-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.7x10-full-ride-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.10x10-full-ride-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.10x10-mainline-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.10x10-auxiliary-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.8x12-full-ride-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.8x12-mainline-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.8x12-auxiliary-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.10x12-full-ride-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.10x12-mainline-led-kit-home-wall')
+                                @include('partials.kilterboards.homewall.10x12-auxiliary-led-kit-home-wall')
+                                @include('partials.kilterboards.original.16x12-boltons-screwons-original')
+                                @include('partials.kilterboards.original.16x12-boltons-original')
+                                @include('partials.kilterboards.original.16x12-screwons-original')
+                                @include('partials.kilterboards.original.12x14-boltons-screwons-original')
+                                @include('partials.kilterboards.original.12x14-boltons-original')
+                                @include('partials.kilterboards.original.12x14-screwons-original')
+                                @include('partials.kilterboards.original.12x12-boltons-screwons-original')
+                                @include('partials.kilterboards.original.12x12-boltons-original')
+                                @include('partials.kilterboards.original.12x12-screwons-original')
+                                @include('partials.kilterboards.original.8x12-boltons-screwons-original')
+                                @include('partials.kilterboards.original.8x12-boltons-original')
+                                @include('partials.kilterboards.original.8x12-screwons-original')
+                                @include('partials.kilterboards.original.7x10-boltons-screwons-original')
+                                @include('partials.kilterboards.original.7x10-boltons-original')
+                                @include('partials.kilterboards.original.7x10-screwons-original')
+
 
 
                             </div>
@@ -49,16 +71,8 @@
                                     <div class="col">
                                         <label for="size" class="form-label">Mida de la paret</label>
                                         <select class="form-select" id="size" name="size">
-                                            <option value="7x10FullRideLedKitHomeWall">7x10 Full ride LED Kit</option>
-                                            <option value="7x10MainlineLedKitHomeWall">7x10 Mainline LED Kit</option>
-                                            <option value="7x10AuxiliaryLedKitHomeWall">7x10 Auxliary LED Kit</option>
-                                            <option value="10x10FullRideLedKitHomeWall">10x10 Full ride LED Kit</option>
-                                            <option value="10x10MainlineLedKitHomeWall">10x10 Mainline LED Kit</option>
-                                            <option value="10x10AuxiliaryLedKitHomeWall">10x10 Auxliary LED Kit</option>
-                                            <option value="8x12FullrideLedKitHomeWall">8x12 Full ride LED Kit</option>
-                                            <option value="8x12MainlineLedKitHomeWall">8x12 Mainline LED Kit</option>
-                                            <option value="10x12FullrideLedKitHomeWall">10x12 Full ride LED Kit</option>
-                                            <option value="10x12MainlineLedKitHomeWall">10x12 Mainline LED Kit</option>
+                                     
+
                                         </select>
                                         <div class="d-none alert alert-danger mt-2" id="sizeAlert"></div>
                                     </div>

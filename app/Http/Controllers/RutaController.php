@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User_ruta;
 use App\Models\User;
 use App\Http\Controllers\HomeWallController;
+use App\Http\Controllers\OriginalController;
 use Illuminate\Validation\ValidationException;
 
 
@@ -58,7 +59,11 @@ class RutaController extends Controller
                 'dificultat' => 'required|in:4a,4b,4c,5a,5b,5c,6a,6a+,6b,6b+,6c,6c+,7a,7a+,7b,7b+,7c,7c+,8a,8a+,8b,8b+,8c,8c+',
                 'peces' => 'required',
                 'layout' => 'required|in:homeWall,original',
-                'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,10x10MainlineLedKitHomeWall,10x10AuxliaryLedKitHomeWall,8x12FullrideLedKitHomeWall,8x12MainlineLedKitHomeWall,10x12FullrideLedKitHomeWall,10x12MainlineLedKitHomeWall',
+                'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,
+                10x10MainlineLedKitHomeWall,10x10AuxliaryLedKitHomeWall,8x12FullRideLedKitHomeWall,8x12MainlineLedKitHomeWall,8x12AuxiliaryLedKitHomeWall,
+                10x12FullRideLedKitHomeWall,10x12MainlineLedKitHomeWall,10x12AuxiliaryLedKitHomeWall,16x12BoltOnsScrewOns,16x12BoltOns,16x12ScrewOns,
+                12x14BoltOnsScrewOns,12x14BoltOns,12x14ScrewOns,12x12BoltOnsScrewOns,12x12BoltOns,12x12ScrewOns,8x12BoltOnsScrewOns,8x12BoltOns,8x12ScrewOns,
+                7x10BoltOnsScrewOns,7x10BoltOns,7x10ScrewOns',
                 
             ], [
                 'nom.required' => 'El nom de la ruta és obligatori',
@@ -83,6 +88,9 @@ class RutaController extends Controller
 
                 $wall = HomeWallController::getSvg($request->size);
 
+            }else {
+                    
+                    $wall = OriginalController::getSvg($request->size);
             }
 
 
@@ -150,11 +158,11 @@ class RutaController extends Controller
 
             // TODO redirigir a vista de la ruta creada
 
-            return response()->json(['success' => 'Ruta creada correctament', 'wall' => $wall,]);
+            return response()->json(['success' => 'Ruta creada correctament']);
         } catch (ValidationException $e) {
-            return response()->json(['error' => $e->errors(), 'wall' => $wall], 422);
+            return response()->json(['error' => $e->errors(), ], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al crear la ruta' . $e, 'wall' => $wall], 500);
+            return response()->json(['error' => 'Error al crear la ruta'], 500);
         }
     }
 }

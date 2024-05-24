@@ -3,56 +3,238 @@ let peces = [];
 let start = 0;
 let end = 0;
 let layout = $('#layout').val();
-let wall = $('#size').val();
+let wall = '';
 const homeWallSizes = {
     '7x10FullRideLedKitHomeWall': {
         'svg': $('[name="7x10FullRideLedKitHomeWall"]'),
+        'value': '7x10FullRideLedKitHomeWall',
+        'text': '7x10 Full Ride LED kit'
     },
     '7x10MainlineLedKitHomeWall': {
         'svg': $('[name="7x10MainlineLedKitHomeWall"]'),
+        'value': '7x10MainlineLedKitHomeWall',
+        'text': '7x10 Mainline LED kit'
     },
     '7x10AuxiliaryLedKitHomeWall': {
         'svg': $('[name="7x10AuxiliaryLedKitHomeWall"]'),
+        'value': '7x10AuxiliaryLedKitHomeWall',
+        'text': '7x10 Auxiliary LED kit'
     },
     '10x10FullRideLedKitHomeWall': {
         'svg': $('[name="10x10FullRideLedKitHomeWall"]'),
+        'value': '10x10FullRideLedKitHomeWall',
+        'text': '10x10 Full Ride LED kit'
     },
     '10x10MainlineLedKitHomeWall': {
         'svg': $('[name="10x10MainlineLedKitHomeWall"]'),
+        'value': '10x10MainlineLedKitHomeWall',
+        'text': '10x10 Mainline LED kit'
     },
     '10x10AuxiliaryLedKitHomeWall': {
         'svg': $('[name="10x10AuxiliaryLedKitHomeWall"]'),
+        'value': '10x10AuxiliaryLedKitHomeWall',
+        'text': '10x10 Auxiliary LED kit'
+    },
+    '8x12FullRideLedKitHomeWall': {
+        'svg': $('[name="8x12FullRideLedKitHomeWall"]'),
+        'value': '8x12FullRideLedKitHomeWall',
+        'text': '8x12 Full Ride LED kit'
+    },
+    '8x12MainlineLedKitHomeWall': {
+        'svg': $('[name="8x12MainlineLedKitHomeWall"]'),
+        'value': '8x12MainlineLedKitHomeWall',
+        'text': '8x12 Mainline LED kit'
+    },
+    '8x12AuxiliaryLedKitHomeWall': {
+        'svg': $('[name="8x12AuxiliaryLedKitHomeWall"]'),
+        'value': '8x12AuxiliaryLedKitHomeWall',
+        'text': '8x12 Auxiliary LED kit'
+    },
+    '10x12FullRideLedKitHomeWall': {
+        'svg': $('[name="10x12FullRideLedKitHomeWall"]'),
+        'value': '10x12FullRideLedKitHomeWall',
+        'text': '10x12 Full Ride LED kit'
+    },
+    '10x12MainlineLedKitHomeWall': {
+        'svg': $('[name="10x12MainlineLedKitHomeWall"]'),
+        'value': '10x12MainlineLedKitHomeWall',
+        'text': '10x12 Mainline LED kit'
+    },
+    '10x12AuxiliaryLedKitHomeWall': {
+        'svg': $('[name="10x12AuxiliaryLedKitHomeWall"]'),
+        'value': '10x12AuxiliaryLedKitHomeWall',
+        'text': '10x12 Auxiliary LED kit'
     },
 };
+const originalSizes = {
+    '7x10BoltOnsScrewOns': {
+        'svg': $('[name="7x10BoltOnsScrewOns"]'),
+        'value': '7x10BoltOnsScrewOns',
+        'text': '7x10 Bolt Ons & Screw Ons'
+    },
+    '7x10BoltOns': {
+        'svg': $('[name="7x10BoltOns"]'),
+        'value': '7x10BoltOns',
+        'text': '7x10 Bolt Ons'
+    },
+    '7x10ScrewOns': {
+        'svg': $('[name="7x10ScrewOns"]'),
+        'value': '7x10ScrewOns',
+        'text': '7x10 Screw Ons'
+    },
+    '8x12BoltOnsScrewOns': {
+        'svg': $('[name="8x12BoltOnsScrewOns"]'),
+        'value': '8x12BoltOnsScrewOns',
+        'text': '8x12 Bolt Ons & Screw Ons'
+    },
+    '8x12BoltOns': {
+        'svg': $('[name="8x12BoltOns"]'),
+        'value': '8x12BoltOns',
+        'text': '8x12 Bolt Ons'
+    },
+    '8x12ScrewOns': {
+        'svg': $('[name="8x12ScrewOns"]'),
+        'value': '8x12ScrewOns',
+        'text': '8x12 Screw Ons'
+    },
+    '12x12BoltOnsScrewOns': {
+        'svg': $('[name="12x12BoltOnsScrewOns"]'),
+        'value': '12x12BoltOnsScrewOns',
+        'text': '12x12 Bolt Ons & Screw Ons'
+    },
+    '12x12BoltOns': {
+        'svg': $('[name="12x12BoltOns"]'),
+        'value': '12x12BoltOns',
+        'text': '12x12 Bolt Ons'
+    },
+    '12x12ScrewOns': {
+        'svg': $('[name="12x12ScrewOns"]'),
+        'value': '12x12ScrewOns',
+        'text': '12x12 Screw Ons'
+    },
+    '12x14BoltOnsScrewOns': {
+        'svg': $('[name="12x14BoltOnsScrewOns"]'),
+        'value': '12x14BoltOnsScrewOns',
+        'text': '12x14 Bolt Ons & Screw Ons'
+    },
+    '12x14BoltOns': {
+        'svg': $('[name="12x14BoltOns"]'),
+        'value': '12x14BoltOns',
+        'text': '12x14 Bolt Ons'
+    },
+    '12x14ScrewOns': {
+        'svg': $('[name="12x14ScrewOns"]'),
+        'value': '12x14ScrewOns',
+        'text': '12x14 Screw Ons'
+    },
+    '16x12BoltOnsScrewOns': {
+        'svg': $('[name="16x12BoltOnsScrewOns"]'),
+        'value': '16x12BoltOnsScrewOns',
+        'text': '16x12 Bolt Ons & Screw Ons'
+    },
+    '16x12BoltOns': {
+        'svg': $('[name="16x12BoltOns"]'),
+        'value': '16x12BoltOns',
+        'text': '16x12 Bolt Ons'
+    },
+    '16x12ScrewOns': {
+        'svg': $('[name="16x12ScrewOns"]'),
+        'value': '16x12ScrewOns',
+        'text': '16x12 Screw Ons'
+    },
+};
+
+function seleccionarPeca(e) {
+    var id = $(this).attr('id');
+
+    // If the path is already selected, we remove it from the array and change the border color to black
+    if (peces.some(e => e.id === id)) {
+        let peca = peces.find(e => e.id === id);
+
+        if (peca.tipus !== 'end') {
+            if (peca.tipus === 'foot') {
+                if (end < 2) {
+                    $(this).css('stroke', 'red');
+                    $(this).css('stroke-width', '2');
+                    peca.tipus = 'end';
+                    end = end + 1;
+                } else {
+                    $(this).css('stroke', 'black');
+                    $(this).css('stroke-width', '1');
+                    peces = peces.filter(e => e.id !== id);
+                    end = end - 1;
+                }
+            }
+            if (peca.tipus === 'middle') {
+                $(this).css('stroke', 'orange');
+                $(this).css('stroke-width', '2');
+                peca.tipus = 'foot';
+            }
+            if (peca.tipus === 'start') {
+                $(this).css('stroke', 'blue');
+                $(this).css('stroke-width', '2');
+                peca.tipus = 'middle';
+                start = start - 1;
+            }
+        } else {
+            $(this).css('stroke', 'black');
+            $(this).css('stroke-width', '1');
+            peces = peces.filter(e => e.id !== id);
+            end = end - 1;
+            return;
+        }
+    } else {
+        // Comprovem que no hi hagi 2 peces de tipus start
+        if (start < 2) {
+            // Change the border color of the path to red
+            $(this).css('stroke', 'yellow');
+            $(this).css('stroke-width', '2');
+            // We add the id to the array
+            peces.push({ id: id, tipus: 'start' });
+            start = start + 1;
+        } else {
+            $(this).css('stroke', 'blue');
+            $(this).css('stroke-width', '2');
+            peces.push({ id: id, tipus: 'middle' });
+        }
+    }
+}
+
+function afegirOptionsHomeWall() {
+    for (let size in homeWallSizes) {
+        $('#size').append(`<option value="${homeWallSizes[size]['value']}">${homeWallSizes[size]['text']}</option>`);
+    }
+}
+
+function afegirOptionsOriginal() {
+    for (let size in originalSizes) {
+        $('#size').append(`<option value="${originalSizes[size]['value']}">${originalSizes[size]['text']}</option>`);
+    }
+}
 
 $(function () {
 
     // comprovar si el layout es homeWall
     if (layout === 'homeWall') {
-        console.log('homeWall');
-        // Comprovem el valor de la variable wall per mostrar el svg correcte de homeWallSizes
-        switch (wall) {
-            case '7x10FullRideLedKitHomeWall':
-                homeWallSizes['7x10FullRideLedKitHomeWall']['svg'].removeClass('d-none');
-                break;
-            case '7x10MainlineLedKitHomeWall':
-                homeWallSizes['7x10MainlineLedKitHomeWall']['svg'].removeClass('d-none');
-                break;
-            case '7x10AuxiliaryLedKitHomeWall':
-                homeWallSizes['7x10AuxiliaryLedKitHomeWall']['svg'].removeClass('d-none');
-                break;
-            case '10x10FullRideLedKitHomeWall':
-                homeWallSizes['10x10FullRideLedKitHomeWall']['svg'].removeClass('d-none');
-                break;
-            case '10x10MainlineLedKitHomeWall':
-                homeWallSizes['10x10MainlineLedKitHomeWall']['svg'].removeClass('d-none');
-                break;
-            case '10x10AuxiliaryLedKitHomeWall':
-                homeWallSizes['10x10AuxiliaryLedKitHomeWall']['svg'].removeClass('d-none');
-                break;
-            
-            
-        }
+        // Afegim les opcions de les mides de les parets de homeWall
+        afegirOptionsHomeWall();
+        wall = '7x10FullRideLedKitHomeWall';
+        // Mostrem la mida de la paret seleccionada
+        $(`[name="${wall}"]`).removeClass('d-none');
+
+    
+    } else if (layout === 'original') {
+        // Comprovem que les options estiguin afegides
+        $('#size').empty();
+        afegirOptionsOriginal();
+        wall = '7x10BoltOnsScrewOns';
+        // Mostrem la mida de la paret seleccionada
+        $(`[name="${wall}"]`).removeClass('d-none');
+    
+
+    } else {
+        $('svg').addClass('d-none');
+        toastAlerts.mostrarToast('danger', 'No s\'ha trobat el layout, si us plau, selecciona un layout.');
     }
 
 
@@ -62,6 +244,35 @@ $(function () {
         $(`[name="${wall}"]`).removeClass('d-none');
         // Unselect all the paths
         $('path').css('stroke', 'black');
+        $('circle').css('stroke', 'black');
+        $('path').css('stroke-width', '1');
+        $('circle').css('stroke-width', '1');
+        start = 0;
+        end = 0;
+        peces = [];
+    });
+
+    $('#layout').on('change', function () {
+        $(`[name="${wall}"]`).addClass('d-none');
+        layout = $(this).val();
+        $('#size').empty();
+        if (layout === 'homeWall') {
+            afegirOptionsHomeWall();
+            wall = '7x10FullRideLedKitHomeWall';
+        } else if (layout === 'original') {
+            afegirOptionsOriginal();
+            wall = '7x10BoltOnsScrewOns';
+        } else {
+            toastAlerts.mostrarToast('danger', 'No s\'ha trobat el layout, si us plau, selecciona un layout.');
+            wall = "";
+        }
+
+        $(`[name="${wall}"]`).removeClass('d-none');
+        // Unselect all the paths
+        $('path').css('stroke', 'black');
+        $('circle').css('stroke', 'black');
+        $('path').css('stroke-width', '1');
+        $('circle').css('stroke-width', '1');
         start = 0;
         end = 0;
         peces = [];
@@ -70,63 +281,8 @@ $(function () {
 
 
     //We add a listener to all the paths of the svg
-    $('path').on('click', function () {
-        console.log('click');
-        // We get the id of the path
-        var id = $(this).attr('id');
-
-        // If the path is already selected, we remove it from the array and change the border color to black
-        if (peces.some(e => e.id === id)) {
-            let peca = peces.find(e => e.id === id);
-
-            if (peca.tipus !== 'end') {
-                if (peca.tipus === 'foot') {
-                    if (end < 2) {
-                        $(this).css('stroke', 'red');
-                        $(this).css('stroke-width', '5');
-                        peca.tipus = 'end';
-                        end = end + 1;
-                    } else {
-                        $(this).css('stroke', 'black');
-                        $(this).css('stroke-width', '1');
-                        peces = peces.filter(e => e.id !== id);
-                        end = end - 1;
-                    }
-                }
-                if (peca.tipus === 'middle') {
-                    $(this).css('stroke', 'orange');
-                    $(this).css('stroke-width', '5');
-                    peca.tipus = 'foot';
-                }
-                if (peca.tipus === 'start') {
-                    $(this).css('stroke', 'blue');
-                    $(this).css('stroke-width', '5');
-                    peca.tipus = 'middle';
-                    start = start - 1;
-                }
-            } else {
-                $(this).css('stroke', 'black');
-                $(this).css('stroke-width', '1');
-                peces = peces.filter(e => e.id !== id);
-                end = end - 1;
-                return;
-            }
-        } else {
-            // Comprovem que no hi hagi 2 peces de tipus start
-            if (start < 2) {
-                // Change the border color of the path to red
-                $(this).css('stroke', 'yellow');
-                $(this).css('stroke-width', '5');
-                // We add the id to the array
-                peces.push({ id: id, tipus: 'start' });
-                start = start + 1;
-            } else {
-                $(this).css('stroke', 'blue');
-                $(this).css('stroke-width', '5');
-                peces.push({ id: id, tipus: 'middle' });
-            }
-        }
-    });
+    $('path').on('click', seleccionarPeca);
+    $('circle').on('click', seleccionarPeca);
 
     $('#formCrearRuta').on('submit', function (e) {
         e.preventDefault();

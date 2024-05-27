@@ -75,3 +75,5 @@ Route::get('crearRuta', [RutaController::class, 'crearRutaView'])->name('crearRu
 
 Route::post('crearRuta', [RutaController::class, 'crearRuta'])->name('crearRuta')->middleware('auth');
 
+Route::get('ruta/{id}', [RutaController::class, 'rutaView'])->name('ruta');
+

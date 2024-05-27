@@ -66,6 +66,11 @@ path:hover {
     height: 100%;
 }
 
+.comments {
+    height: 20rem;
+    overflow-y: auto;
+    background-color: #ffffff;
+}
 
 
 .shell {

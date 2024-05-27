@@ -7,16 +7,51 @@ use App\Models\User_ruta;
 use App\Models\User;
 use App\Http\Controllers\HomeWallController;
 use App\Http\Controllers\OriginalController;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+
 
 
 
 
 class RutaController extends Controller
 {
-    public function index()
+    public function rutaView($id)
     {
-        return view('rutes.index');
+        try {
+            // Comprovem que la ruta existeixi
+            $ruta = User_ruta::find($id);
+            if (!$ruta) {
+                return redirect()->route('home')->with('error', 'La ruta no existeix');
+            }
+
+            // Agafem les dades de l'usuari
+            $user = User::getUserById($ruta->user_id);
+
+            Carbon::setLocale('ca');
+
+            // Calculem quan fa que es va crear la ruta
+            $ruta->created = now()->diffForHumans($ruta->created_at, ['syntax' => Carbon::DIFF_ABSOLUTE, 'aUnit' => true]);
+
+            
+            if(!Auth::check()){
+                $notFriends = User::getAll();
+                return view('ruta', compact('ruta', 'user', 'notFriends'));
+            }
+            
+            // Agafem les dades del chat
+            $chatData = User::getChatData();
+            $friends = $chatData['friends'];
+            $friendRequests = $chatData['friendRequests'];
+            $notFriends = $chatData['notFriends'];
+            $totalUnreadMessages = $chatData['totalUnreadMessages'];
+            $totalFriendRequests = $chatData['totalFriendRequests'];
+
+            return view('ruta', compact('ruta', 'friends', 'friendRequests', 'notFriends', 'totalUnreadMessages', 'totalFriendRequests', 'user'));
+        } catch (\Exception $e) {
+            return redirect()->route('home')->with('error', 'Error al carregar la pàgina de la ruta'. $e);
+        }
     }
 
     /**
@@ -59,11 +94,7 @@ class RutaController extends Controller
                 'dificultat' => 'required|in:4a,4b,4c,5a,5b,5c,6a,6a+,6b,6b+,6c,6c+,7a,7a+,7b,7b+,7c,7c+,8a,8a+,8b,8b+,8c,8c+',
                 'peces' => 'required',
                 'layout' => 'required|in:homeWall,original',
-                'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,
-                10x10MainlineLedKitHomeWall,10x10AuxliaryLedKitHomeWall,8x12FullRideLedKitHomeWall,8x12MainlineLedKitHomeWall,8x12AuxiliaryLedKitHomeWall,
-                10x12FullRideLedKitHomeWall,10x12MainlineLedKitHomeWall,10x12AuxiliaryLedKitHomeWall,16x12BoltOnsScrewOns,16x12BoltOns,16x12ScrewOns,
-                12x14BoltOnsScrewOns,12x14BoltOns,12x14ScrewOns,12x12BoltOnsScrewOns,12x12BoltOns,12x12ScrewOns,8x12BoltOnsScrewOns,8x12BoltOns,8x12ScrewOns,
-                7x10BoltOnsScrewOns,7x10BoltOns,7x10ScrewOns',
+                'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,10x10MainlineLedKitHomeWall,10x10AuxliaryLedKitHomeWall,8x12FullRideLedKitHomeWall,8x12MainlineLedKitHomeWall,8x12AuxiliaryLedKitHomeWall,10x12FullRideLedKitHomeWall,10x12MainlineLedKitHomeWall,10x12AuxiliaryLedKitHomeWall,16x12BoltOnsScrewOns,16x12BoltOns,16x12ScrewOns,12x14BoltOnsScrewOns,12x14BoltOns,12x14ScrewOns,12x12BoltOnsScrewOns,12x12BoltOns,12x12ScrewOns,8x12BoltOnsScrewOns,8x12BoltOns,8x12ScrewOns,7x10BoltOnsScrewOns,7x10BoltOns,7x10ScrewOns',
                 
             ], [
                 'nom.required' => 'El nom de la ruta és obligatori',
@@ -154,11 +185,12 @@ class RutaController extends Controller
             $ruta->dificultat = $request->dificultat;
             $ruta->inclinacio = $request->inclinacio;
             $ruta->layout = $request->layout . ' ' . $request->size;
+            if($request->esborrany){
+                $ruta->esborrany = 1;
+            }
             $ruta->save();
 
-            // TODO redirigir a vista de la ruta creada
-
-            return response()->json(['success' => 'Ruta creada correctament']);
+            return response()->json(['route' => route('ruta', ['id' => $ruta->id])], 200);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->errors(), ], 422);
         } catch (\Exception $e) {

@@ -11,7 +11,7 @@
     @include('partials.scripts')
     @yield('styles')
     @yield('scripts')
-    
+
     @auth
     @vite('resources/js/chatFriends.js')
     @endauth
@@ -23,7 +23,7 @@
 
         <div class="shell">
 
-            <div id="left" >
+            <div id="left">
                 @include('partials.sidebar')
             </div>
             <div id="mid" style="min-width: 0;">
@@ -32,7 +32,7 @@
 
                 <div id="divToasts" class="toast-container position-fixed top-5 start-5 p-3">
                     @if (session('success'))
-                    <div class=" toast show text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true" autohide="true" >
+                    <div class=" toast show text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true" autohide="true">
                         <div class="toast-header">
                             <strong class="me-auto">Notificació</strong>
                             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">

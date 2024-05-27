@@ -91,7 +91,7 @@ class UserController extends Controller
             }
 
             if ($user->id == Auth::user()->id) {
-                return redirect()->route('home');
+                return redirect()->route('perfilPropi');
             }
 
             $chatData = User::getChatData();

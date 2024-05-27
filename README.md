@@ -2,11 +2,8 @@
 - Acabar wireframe
 - Mockup
 - Rutes
-    - crear el resto de svg
-    - Limpiar los svgs
-    - Afegir les noves comprobacions
-    - Tener en cuenta que habra rutas que es podrán haer en más de un modelo
     - Vista de ruta 
+        - 
     - Vista en el home de rutas populares y de amigos
     - Ver tus rutas 
     - Ver las rutas de otros usuarios en su perfil

@@ -290,12 +290,8 @@ $(function () {
         formData.append('peces', JSON.stringify(peces));
         axios.post('/crearRuta', formData)
             .then(function (response) {
-                console.log(response);
-                if (response.data.success) {
-                    alert('Ruta creada correctament');
-                } else {
-                    alert('Error al crear la ruta');
-                }
+                
+                window.location.href = response.data.route;
             })
             .catch(function (error) {
                 console.log(error);

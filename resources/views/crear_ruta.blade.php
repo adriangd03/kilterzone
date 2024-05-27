@@ -27,7 +27,6 @@
                                 @include('partials.kilterboards.homewall.7x10-mainline-led-kit-home-wall')
                                 @include('partials.kilterboards.homewall.7x10-auxiliary-led-kit-home-wall')
                                 @include('partials.kilterboards.homewall.7x10-full-ride-led-kit-home-wall')
-                                @include('partials.kilterboards.homewall.10x10-full-ride-led-kit-home-wall')
                                 @include('partials.kilterboards.homewall.10x10-mainline-led-kit-home-wall')
                                 @include('partials.kilterboards.homewall.10x10-auxiliary-led-kit-home-wall')
                                 @include('partials.kilterboards.homewall.8x12-full-ride-led-kit-home-wall')
@@ -142,6 +141,10 @@
                                     <label for="descripcio" class="form-label">Descripció de la ruta</label>
                                     <textarea class="form-control" id="descripcio" name="descripcio" rows="3"></textarea>
                                     <div class="d-none alert alert-danger mt-2" id="descripcioAlert"></div>
+                                </div>
+                                <div class="mb-3 form-check form-switch justify-content-center ">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="esborrany" name="esborrany">
+                                    <label class="form-check-label" for="esborrany">Guardar com a esborrany</label>
                                 </div>
                                 <div class="row text-center">
                                     <button type="submit" class="btn btn-primary w-0 ">Crear ruta</button>

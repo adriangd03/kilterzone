@@ -21,5 +21,68 @@ class User_ruta extends Model
         'layout',
     ];
 
+
+    /**
+     * Funció per agafar totes les rutes d'un usuari
+     */
+    public static function getRutes($user_id)
+    {
+        return User_ruta::where('user_id', $user_id)->get();
+    }
+
+    /**
+     * Funció per agafar una ruta per id
+     */
+    public static function getRuta($id)
+    {
+        return User_ruta::find($id);
+    }
+
+    /**
+     * Funció per esborrar una ruta per id
+     */
+    public static function deleteRuta($id)
+    {
+        return User_ruta::find($id)->delete();
+    }
+
+    /**
+     * Funció per sumar un like a una ruta
+     */
+    public static function sumarLike($ruta)
+    {
+        $ruta->likes = $ruta->likes + 1;
+        $ruta->save();
+    }
+
+    /**
+     * Funció per restar un like a una ruta
+     */
+    public static function restarLike($ruta)
+    {
+        $ruta->likes = $ruta->likes - 1;
+        $ruta->save();
+    }
+
+    /**
+     * Funció per sumar una escalada a una ruta
+     */
+    public static function sumarEscalada($ruta)
+    {
+        $ruta->escalada = $ruta->escalada + 1;
+        $ruta->save();
+    }
+
+    /**
+     * Funció per restar una escalada a una ruta
+     */
+    public static function restarEscalada($ruta)
+    {
+        $ruta->escalada = $ruta->escalada - 1;
+        $ruta->save();
+    }
+
+
+
     
 }

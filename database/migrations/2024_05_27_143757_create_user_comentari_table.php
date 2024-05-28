@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('user_comentari', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('ruta_id');
+            $table->string('comentari');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('ruta_id')->references('id')->on('user_ruta')->onDelete('cascade');
             $table->timestamps();
         });
     }

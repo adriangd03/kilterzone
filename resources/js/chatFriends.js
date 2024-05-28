@@ -4,7 +4,7 @@ import notificacions from './modules/notificacions.js';
 import { seleccionarUsuari } from "./modules/friends.js";
 import friends from './modules/friends.js';
 import missatges from './modules/chat.js';
-import toastAlerts from './modules/alerts.js';
+import toastAlerts from './modules/toastAlerts.js';
 import { Offcanvas } from 'bootstrap';
 
 var chatFriends = $(function () {

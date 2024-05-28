@@ -13,8 +13,6 @@ export const receiver = document.getElementById("receiver");
 export const offCanvasChat = document.getElementById("offcanvasChat");
 // Constant del offcanvas d'usuari
 export const offCanvasUsuaris = document.getElementById("offcanvasUsuaris");
-// Constant del div de toasts
-export const divToasts = document.getElementById("divToasts");
 // Constant del badge de notificacions
 export const notificacionsBadge = document.getElementById("notificacionsBadge");
 // Constant del badge de sol·licituds d'amistat

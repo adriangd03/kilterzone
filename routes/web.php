@@ -77,3 +77,9 @@ Route::post('crearRuta', [RutaController::class, 'crearRuta'])->name('crearRuta'
 
 Route::get('ruta/{id}', [RutaController::class, 'rutaView'])->name('ruta');
 
+Route::get('ruta/like/{id}', [RutaController::class, 'like'])->name('ruta.like')->middleware('auth');
+
+Route::get('ruta/escalat/{id}', [RutaController::class, 'escalada'])->name('ruta.escalada')->middleware('auth');
+
+Route::post('ruta/comentari', [RutaController::class, 'comentar'])->name('ruta.comentar')->middleware('auth');
+

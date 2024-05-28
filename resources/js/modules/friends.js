@@ -1,6 +1,6 @@
 import { chat, authUserAvatar, receiver, divSolAmics, $solAmicsBadge, $solAmicsBadgeValue, userId, form, notificacionsBadge } from './constantChatFriends.js';
 import missatges from './chat.js';
-import toastAlerts from './alerts.js';
+import toastAlerts from './toastAlerts.js';
 import notificacions from './notificacions.js';
 /**
  * Funció per seleccionar un usuari i obrir el xat amb ell
@@ -118,7 +118,7 @@ var friends = {
     mostrarNouAmic: function (friend, $element) {
         var $div = $('<div>', { class: "friend col-3 p-2 justify-content-center position-relative text-center user-hover", id: friend.id });
         $div.append($('<div>', { class: "user-info" }).append
-            ($('<img>', { class: "rounded-circle", src: friend.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }),
+            ($('<img>', { class: "rounded-circle border", src: friend.avatar, alt: "avatar 1", style: "width: 45px; height: 45px;" }),
                 $('<div>', { class: "card-text" }).append
                     ($('<div>', { class: "friend-username" }).text(friend.username),
                         $('<div>', { class: "user-status", id: `status${friend.id}` }).text("Online")),
@@ -142,7 +142,7 @@ var friends = {
         $a.append($('<div>', { class: "row m-1 w-100 pt-2 pb-2" })
             .append($('<div>', { class: "col align-content-center" })
                 .append($('<div>', { class: "d-flex d-inline align-items-center align-content-center" })
-                    .append($('<img>', { class: "rounded-circle", src: friend.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }),
+                    .append($('<img>', { class: "rounded-circle border", src: friend.avatar, alt: "avatar 1", style: "width: 45px; height: 45px;" }),
                         $('<div>', { class: "card-text ms-1" })
                             .append($('<div>', { class: 'text-dark' }).text(friend.username)))),
 
@@ -264,7 +264,7 @@ var friends = {
         $a.append($('<div>', { id: `solAmic-${user.id}`, class: "col-12 text-center p-2 rounded user-hover" })
             .append($('<div>', { class: "user-info" })
                 .append(
-                    $('<img>', { class: "rounded-circle", src: user.avatar, alt: "avatar 1", style: "width: 45px; height: 100%;" }),
+                    $('<img>', { class: "rounded-circle border", src: user.avatar, alt: "avatar 1", style: "width: 45px; height: 45px;" }),
                     $('<div>', { class: "card-text" })
                         .append($('<div>', { class: "fw-bold text-dark" }).text(user.username)),
                     $formAcceptarAmic,

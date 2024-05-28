@@ -23,7 +23,7 @@
                                     @foreach($friends as $friend)
                                     <div class="friend col-3 p-2 justify-content-center position-relative text-center user-hover" id="{{ $friend->id }}">
                                         <div class="user-info">
-                                            <img class="rounded-circle" src="{{$friend->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
+                                            <img class="rounded-circle border" src="{{$friend->avatar}}" alt="avatar 1" style="width: 45px; height: 100%;">
                                             <div class="card-text">
                                                 <div class="friend-username">{{ $friend->username }}</div>
                                                 <div id="status{{$friend->id}}" class="user-status">Offline</div>

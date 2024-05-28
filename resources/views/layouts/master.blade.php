@@ -29,7 +29,6 @@
             <div id="mid" style="min-width: 0;">
 
                 @yield('content')
-
                 <div id="divToasts" class="toast-container position-fixed top-5 start-5 p-3">
                     @if (session('success'))
                     <div class=" toast show text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true" autohide="true">
@@ -41,22 +40,24 @@
                             {{ session('success') }}
                         </div>
                     </div>
-                </div>
-                @endif
+                    @endif
 
-                @if (session('error'))
-                <div class=" toast show align-items-center text-white bg-primary border-0 bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-                        <strong class="me-auto">KilterZone</strong>
-                        <small>now</small>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">
+                    @if (session('error'))
+                    <div class=" toast show align-items-center text-white bg-primary border-0 bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+                            <strong class="me-auto">KilterZone</strong>
+                            <small>now</small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">
+                        </div>
+                        <div class="toast-body">
+                            {{ session('error') }}
+                        </div>
                     </div>
-                    <div class="toast-body">
-                        {{ session('error') }}
-                    </div>
+
+                    @endif
+
                 </div>
 
-                @endif
 
 
 

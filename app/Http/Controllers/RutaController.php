@@ -7,9 +7,13 @@ use App\Models\User_ruta;
 use App\Models\User;
 use App\Http\Controllers\HomeWallController;
 use App\Http\Controllers\OriginalController;
+use App\Models\User_comentari;
+use App\Models\User_like;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Models\User_escalada;
+use App\Events\NouComentari;
 
 
 
@@ -34,11 +38,16 @@ class RutaController extends Controller
             // Calculem quan fa que es va crear la ruta
             $ruta->created = now()->diffForHumans($ruta->created_at, ['syntax' => Carbon::DIFF_ABSOLUTE, 'aUnit' => true]);
 
+            // Agafem els comentaris de la ruta
+            $comentaris = User_comentari::getComentaris($ruta->id);
+
             
             if(!Auth::check()){
                 $notFriends = User::getAll();
-                return view('ruta', compact('ruta', 'user', 'notFriends'));
+                return view('ruta', compact('ruta', 'user', 'notFriends', 'comentaris'));
             }
+
+            $liked = User_like::isLiked(Auth::user()->id, $ruta->id); 
             
             // Agafem les dades del chat
             $chatData = User::getChatData();
@@ -48,7 +57,7 @@ class RutaController extends Controller
             $totalUnreadMessages = $chatData['totalUnreadMessages'];
             $totalFriendRequests = $chatData['totalFriendRequests'];
 
-            return view('ruta', compact('ruta', 'friends', 'friendRequests', 'notFriends', 'totalUnreadMessages', 'totalFriendRequests', 'user'));
+            return view('ruta', compact('ruta', 'friends', 'friendRequests', 'notFriends', 'totalUnreadMessages', 'totalFriendRequests', 'user', 'liked', 'comentaris'));
         } catch (\Exception $e) {
             return redirect()->route('home')->with('error', 'Error al carregar la pàgina de la ruta'. $e);
         }
@@ -195,6 +204,99 @@ class RutaController extends Controller
             return response()->json(['error' => $e->errors(), ], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al crear la ruta'], 500);
+
+        }
+    }
+
+    /**
+     * Funció per donar like a una ruta
+     * @param int $id id de la ruta
+     */
+    public function like($id)
+    {
+        try {
+
+            $ruta = User_ruta::find($id);
+            if (!$ruta) {
+                return response()->json(['error' => 'La ruta no existeix'], 404);
+            }
+
+            $liked = User_like::like(Auth::user()->id, $ruta->id);
+
+            if ($liked) {
+                User_ruta::sumarLike($ruta);
+            } else {
+                User_ruta::restarLike($ruta);
+            }
+
+            return response()->json(['liked' => $liked], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al donar like a la ruta'], 500);
+        }
+    }
+
+    /**
+     * Funció per marcar una escalada a una ruta
+     * @param int $id id de la ruta
+     */
+    public function escalada($id)
+    {
+        try {
+
+            $ruta = User_ruta::find($id);
+            if (!$ruta) {
+                return response()->json(['error' => 'La ruta no existeix'], 404);
+            }
+
+            $escalada = User_escalada::escalada(Auth::user()->id, $ruta->id);
+
+            if ($escalada) {
+                User_ruta::sumarEscalada($ruta);
+            } else {
+                User_ruta::restarEscalada($ruta);
+            }
+
+            return response()->json(['escalada' => $escalada], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al marcar una escalada a la ruta' . $e], 500);
+        }
+    }
+
+    /**
+     * Funció per comentar una ruta
+     * @param Request $request
+     * 
+     */
+    public function comentar(Request $request)
+    {
+        try {
+            $request->validate([
+                'comentari' => 'required|string|max:255',
+                'rutaId' => 'required|integer',
+            ], [
+                'comentari.required' => 'El comentari és obligatori',
+                'comentari.string' => 'El comentari ha de ser un text',
+                'comentari.max' => 'El comentari no pot superar els 255 caràcters',
+                'rutaId.required' => 'La ruta és obligatòria',
+                'rutaId.integer' => 'La ruta ha de ser un número',
+            ]);
+
+            $ruta = User_ruta::find($request->rutaId);
+            if (!$ruta) {
+                return response()->json(['error' => 'La ruta no existeix'], 404);
+            }
+
+            $user = User::getUserById(Auth::user()->id);
+
+            $comentari = User_comentari::addComentari($user->id, $ruta->id, $request->comentari);
+
+            event(new NouComentari($ruta->id, $request->comentari, $user));
+
+            return response()->json(['comentari' => $comentari, 'user' => $user], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->errors(), ], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al comentar la ruta'], 500);
         }
     }
 }

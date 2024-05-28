@@ -31,3 +31,8 @@ Broadcast::channel('presence.ChatMessage.{id}', function ($user, $id) {
 Broadcast::channel('presence.UsersOnline', function ($user) {
     return $user;
 });
+
+// public channel
+Broadcast::channel('ruta.{id}', function ($user) {
+    return $user;
+});

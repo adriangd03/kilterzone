@@ -17,7 +17,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-2 col-sm-3 ">
-                            <img src="{{$user->avatar}}" class="rounded-circle " height="140px" width="140px" alt="...">
+                            <img src="{{$user->avatar}}" class="rounded-circle border" height="140px" width="140px" alt="...">
                         </div>
                         <div class="col ">
                             <div class="row">

@@ -24,7 +24,7 @@
                                 <h6>Imatge de perfil</h6>
                             </div>
                             <div class="d-flex align-items-center">
-                                <img src="{{ Auth::user()->avatar }}" class="rounded-circle" alt="avatar" style="width: 60px; height: 60px;">
+                                <img src="{{ Auth::user()->avatar }}" class="rounded-circle border" alt="avatar" style="width: 60px; height: 60px;">
                                 <span class="ms-2 text-muted">{{ Auth::user()->username }}</span>
                                 <button type="button" class="btn btn-secondary ms-4 " data-bs-toggle="modal" data-bs-target="#modalAvatar">Canviar</button>
                             </div>

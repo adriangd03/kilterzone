@@ -18,7 +18,7 @@ function crearMissatgeEnviat(message, date = formatDate(new Date())) {
             , $('<p>', { class: "small text-muted" }).html(date)));
 
     $messageDiv.append($('<div>', { class: "d-flex flex-row justify-content-end" })
-        .append($('<img>', { class: "rounded-circle", src: authUserAvatar, alt: "You", style: "width: 45px; height: 45px;" })
+        .append($('<img>', { class: "rounded-circle border", src: authUserAvatar, alt: "You", style: "width: 45px; height: 45px;" })
             , $('<div>', { class: "card-text" })
                 .append($('<p>', { class: "small p-2 ms-3 mb-3 rounded-3", style: "background-color: #f5f6f7;" }).html(message))));
 
@@ -38,7 +38,7 @@ function crearMissatgeRebut(user, message, date = formatDate(new Date())) {
             , $('<p>', { class: "small text-muted" }).html(date)));
 
     $messageDiv.append($('<div>', { class: "d-flex flex-row justify-content-start" })
-        .append($('<img>', { class: "rounded-circle", src: user.avatar, alt: user.username, style: "width: 45px; height: 45px;" })
+        .append($('<img>', { class: "rounded-circle border", src: user.avatar, alt: user.username, style: "width: 45px; height: 45px;" })
             , $('<div>', { class: "card-text" })
                 .append($('<p>', { class: "small p-2 ms-3 mb-3 rounded-3", style: "background-color: #f5f6f7;" }).html(message))));
 

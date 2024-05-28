@@ -1,4 +1,4 @@
-import toastAlerts from "./modules/alerts";
+import toastAlerts from "./modules/toastAlerts";
 let peces = [];
 let start = 0;
 let end = 0;

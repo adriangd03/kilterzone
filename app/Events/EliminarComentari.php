@@ -9,9 +9,8 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\User;
 
-class NouComentari implements ShouldBroadcast
+class EliminarComentari implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,14 +18,10 @@ class NouComentari implements ShouldBroadcast
      * Create a new event instance.
      */
     private int $ruta_id;
-    private Object $comentari;
-    private User $user;
-    private mixed $comentari_id;
-    public function __construct(int $ruta_id, Object $comentari, User $user, int $comentari_id = null)
+    private int $comentari_id;
+    public function __construct(int $ruta_id, int $comentari_id)
     {
         $this->ruta_id = $ruta_id;
-        $this->comentari = $comentari;
-        $this->user = $user;
         $this->comentari_id = $comentari_id;
     }
 
@@ -38,21 +33,7 @@ class NouComentari implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('ruta.' . $this->ruta_id)
+            new PrivateChannel('channel-name'),
         ];
-    }
-
-    public function broadcastWith(): array
-    {
-        return [
-            'nouComentari' => $this->comentari,
-            'user' => $this->user->only(['username', 'avatar', 'id']),
-            'comentari_id' => $this->comentari_id
-        ];
-    }
-
-    public function broadcastAs()
-    {
-        return 'NouComentari';
     }
 }

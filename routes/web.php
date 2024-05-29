@@ -83,3 +83,7 @@ Route::get('ruta/escalat/{id}', [RutaController::class, 'escalada'])->name('ruta
 
 Route::post('ruta/comentari', [RutaController::class, 'comentar'])->name('ruta.comentar')->middleware('auth');
 
+Route::post('ruta/comentari/eliminar', [RutaController::class, 'eliminarComentari'])->name('ruta.comentari.eliminar')->middleware('auth');
+
+Route::post('ruta/comentari/editar', [RutaController::class, 'editarComentari'])->name('ruta.comentari.editar')->middleware('auth');
+

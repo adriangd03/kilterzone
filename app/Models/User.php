@@ -171,5 +171,28 @@ class User extends Authenticatable implements CanResetPassword
         ];
     }
 
+    /**
+     * Funció per afegir link si es menciona a un usuari amb @
+     * @param string $text Text amb mencions
+     * @return string Text amb links
+     */
+    public static function addLinks($text, $startingPos = 0)
+    {
+        $pos = strpos($text, '@', $startingPos);
+        while ($pos !== false) {
+            $pos2 = strpos($text, ' ', $pos);
+            if ($pos2 === false) {
+                $pos2 = strlen($text);
+            }
+            $username = substr($text, $pos + 1, $pos2 - $pos - 1);
+            $user = User::getUserByUsername($username);
+            if ($user) {
+                $text = substr($text, 0, $pos) . '<a href="/profile/' . $user->id . '"> @' . $username . '</a>' . substr($text, $pos2);
+            }
+            $pos = strpos($text, '@', $pos2);
+        }
+        return $text;
+    }
+
     
 }

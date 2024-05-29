@@ -16,8 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('ruta_id');
             $table->string('comentari');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('ruta_id')->references('id')->on('user_ruta')->onDelete('cascade');
+            $table->integer('likes')->default(0);
+            $table->unsignedBigInteger('comentari_id')->nullable();
+            $table->boolean('editat')->default(false);
+            $table->boolean('esborrat')->default(false);
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('ruta_id')->references('id')->on('user_ruta')->onDelete('cascade');            
             $table->timestamps();
         });
     }

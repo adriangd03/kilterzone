@@ -72,6 +72,9 @@ path:hover {
     background-color: #ffffff;
 }
 
+.comment-selected {
+    background-color: #f0f0f0;
+}
 
 .shell {
     display: flex;

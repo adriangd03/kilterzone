@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Models\User_escalada;
 use App\Events\NouComentari;
+use App\Events\EditarComentari;
+use App\Events\EliminarComentari;
+use Illuminate\Support\Str;
 
 
 
@@ -41,14 +44,16 @@ class RutaController extends Controller
             // Agafem els comentaris de la ruta
             $comentaris = User_comentari::getComentaris($ruta->id);
 
-            
-            if(!Auth::check()){
+
+            if (!Auth::check()) {
                 $notFriends = User::getAll();
                 return view('ruta', compact('ruta', 'user', 'notFriends', 'comentaris'));
             }
 
-            $liked = User_like::isLiked(Auth::user()->id, $ruta->id); 
-            
+            $liked = User_like::isLiked(Auth::user()->id, $ruta->id);
+
+            $escalat = User_escalada::haEscalat(Auth::user()->id, $ruta->id);
+
             // Agafem les dades del chat
             $chatData = User::getChatData();
             $friends = $chatData['friends'];
@@ -57,9 +62,9 @@ class RutaController extends Controller
             $totalUnreadMessages = $chatData['totalUnreadMessages'];
             $totalFriendRequests = $chatData['totalFriendRequests'];
 
-            return view('ruta', compact('ruta', 'friends', 'friendRequests', 'notFriends', 'totalUnreadMessages', 'totalFriendRequests', 'user', 'liked', 'comentaris'));
+            return view('ruta', compact('ruta', 'friends', 'friendRequests', 'notFriends', 'totalUnreadMessages', 'totalFriendRequests', 'user', 'liked', 'comentaris', 'escalat'));
         } catch (\Exception $e) {
-            return redirect()->route('home')->with('error', 'Error al carregar la pàgina de la ruta'. $e);
+            return redirect()->route('home')->with('error', 'Error al carregar la pàgina de la ruta' . $e);
         }
     }
 
@@ -95,7 +100,7 @@ class RutaController extends Controller
     public function crearRuta(Request $request)
     {
         try {
-            
+
             $request->validate([
                 'nom' => 'required|string|max:45|unique:user_ruta,nom_ruta',
                 'descripcio' => 'required|string|max:255',
@@ -104,7 +109,7 @@ class RutaController extends Controller
                 'peces' => 'required',
                 'layout' => 'required|in:homeWall,original',
                 'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,10x10MainlineLedKitHomeWall,10x10AuxliaryLedKitHomeWall,8x12FullRideLedKitHomeWall,8x12MainlineLedKitHomeWall,8x12AuxiliaryLedKitHomeWall,10x12FullRideLedKitHomeWall,10x12MainlineLedKitHomeWall,10x12AuxiliaryLedKitHomeWall,16x12BoltOnsScrewOns,16x12BoltOns,16x12ScrewOns,12x14BoltOnsScrewOns,12x14BoltOns,12x14ScrewOns,12x12BoltOnsScrewOns,12x12BoltOns,12x12ScrewOns,8x12BoltOnsScrewOns,8x12BoltOns,8x12ScrewOns,7x10BoltOnsScrewOns,7x10BoltOns,7x10ScrewOns',
-                
+
             ], [
                 'nom.required' => 'El nom de la ruta és obligatori',
                 'nom.string' => 'El nom de la ruta ha de ser un text',
@@ -123,14 +128,13 @@ class RutaController extends Controller
                 'size.required' => 'La mida de la ruta és obligatòria',
                 'size.in' => 'La mida de la ruta no és vàlida',
             ]);
-            
-            if($request->layout === 'homeWall'){
+
+            if ($request->layout === 'homeWall') {
 
                 $wall = HomeWallController::getSvg($request->size);
+            } else {
 
-            }else {
-                    
-                    $wall = OriginalController::getSvg($request->size);
+                $wall = OriginalController::getSvg($request->size);
             }
 
 
@@ -194,17 +198,16 @@ class RutaController extends Controller
             $ruta->dificultat = $request->dificultat;
             $ruta->inclinacio = $request->inclinacio;
             $ruta->layout = $request->layout . ' ' . $request->size;
-            if($request->esborrany){
+            if ($request->esborrany) {
                 $ruta->esborrany = 1;
             }
             $ruta->save();
 
             return response()->json(['route' => route('ruta', ['id' => $ruta->id])], 200);
         } catch (ValidationException $e) {
-            return response()->json(['error' => $e->errors(), ], 422);
+            return response()->json(['error' => $e->errors(),], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al crear la ruta'], 500);
-
         }
     }
 
@@ -271,12 +274,15 @@ class RutaController extends Controller
     {
         try {
             $request->validate([
-                'comentari' => 'required|string|max:255',
+                'comentari' => 'required|string|max:255|min:5',
                 'rutaId' => 'required|integer',
+                'comentariId' => 'integer|nullable',
+
             ], [
                 'comentari.required' => 'El comentari és obligatori',
                 'comentari.string' => 'El comentari ha de ser un text',
                 'comentari.max' => 'El comentari no pot superar els 255 caràcters',
+                'comentari.min' => 'El comentari ha de tenir almenys 5 caràcters',
                 'rutaId.required' => 'La ruta és obligatòria',
                 'rutaId.integer' => 'La ruta ha de ser un número',
             ]);
@@ -286,17 +292,156 @@ class RutaController extends Controller
                 return response()->json(['error' => 'La ruta no existeix'], 404);
             }
 
+            $request->comentari = strip_tags($request->comentari);
+            $request->comentari = htmlspecialchars($request->comentari);
+
+
+            if (strlen($request->comentari) < 5) {
+                return response()->json(['error' => 'El comentari no ha de contenir caràcters html'], 500);
+            }
+
+
+            if ($request->comentariId) {
+                $comentari = User_comentari::getComentari($request->comentariId);
+                if (!$comentari) {
+                    return response()->json(['error' => 'El comentari no existeix'], 404);
+                }
+
+                if ($comentari->ruta_id != $ruta->id) {
+                    return response()->json(['error' => 'El comentari no pertany a la ruta'], 404);
+                }
+
+                if($request->comentari[0] === '@')
+                {
+                    
+                    
+                    if($comentari->comentari_id){
+                        $comentari->id = $comentari->comentari_id;
+                    }
+                    
+                    $user = User::getUserById($comentari->user_id);
+                    
+                    if(strpos($request->comentari, '@'.$user->username) === false)
+                    {
+                        $request->comentari = Str::replaceFirst( '@', '<a href="' . route('perfil', ['id' => $user->id]) .'">@'.$user->username . '</a> ', $request->comentari);
+                    }else{
+                        $request->comentari = Str::replaceFirst( '@'.$user->username, '<a href="' . route('perfil', ['id' => $user->id]) .'">@'.$user->username . '</a> ', $request->comentari);
+                        
+                    }
+                    
+                    $user = User::getUserById(Auth::user()->id);
+                    
+                    $request->comentari = User::addLinks($request->comentari, strpos($request->comentari, '</a>'));
+                    
+                    $nouComentari =  User_comentari::addComentari($user->id, $ruta->id, $request->comentari, $comentari->id);
+                    
+                    event(new NouComentari($ruta->id, $nouComentari, $user, $comentari->id));
+                    return response()->json(['user' => $user, 'comentariId' => $comentari->id, 'comentari' => $nouComentari], 200);
+                }
+
+            }
+
+            $request->comentari = User::addLinks($request->comentari);
+
             $user = User::getUserById(Auth::user()->id);
 
-            $comentari = User_comentari::addComentari($user->id, $ruta->id, $request->comentari);
+            $nouComentari = User_comentari::addComentari($user->id, $ruta->id, $request->comentari);
 
-            event(new NouComentari($ruta->id, $request->comentari, $user));
+            event(new NouComentari($ruta->id, $nouComentari, $user));
 
-            return response()->json(['comentari' => $comentari, 'user' => $user], 200);
+            return response()->json(['user' => $user, 'comentari' => $nouComentari], 200);
         } catch (ValidationException $e) {
-            return response()->json(['error' => $e->errors(), ], 422);
+            return response()->json(['error' => $e->errors(),], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al comentar la ruta'], 500);
+            return response()->json(['error' => 'Error al comentar la ruta'. $e], 500);
         }
     }
+
+    /**
+     * Funció per eliminar un comentari
+     * @param Request $request
+     * 
+     */
+    public function eliminarComentari(Request $request)
+    {
+        try {
+            $request->validate([
+                'comentariId' => 'required|exists:user_comentari,id',
+            ], [
+                'comentariId.required' => 'El comentari és obligatori',
+                'comentariId.exists' => 'El comentari no existeix',
+            ]);
+            
+            $comentari = User_comentari::getComentari($request->comentariId);
+
+            if ($comentari->user_id != Auth::user()->id) {
+                return response()->json(['error' => 'No pots eliminar aquest comentari'], 403);
+            }
+
+            if($comentari->esborrat) {
+                return response()->json(['error' => 'El comentari ja ha estat eliminat'], 403);
+            }
+
+            User_comentari::eliminarComentari($comentari);
+
+            return response()->json(['comentariId' => $comentari->id], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->errors(),], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al eliminar el comentari'. $e], 500);
+        }
+    }
+
+    /**
+     * Funció per editar un comentari
+     * @param Request $request
+     * 
+     */
+    public function editarComentari(Request $request)
+    {
+        try {
+            $request->validate([
+                'comentariId' => 'required|exists:user_comentari,id',
+                'comentari' => 'required|string|max:255|min:5',
+            ], [
+                'comentariId.required' => 'El comentari és obligatori',
+                'comentariId.exists' => 'El comentari no existeix',
+                'comentari.required' => 'El comentari és obligatori',
+                'comentari.string' => 'El comentari ha de ser un text',
+                'comentari.max' => 'El comentari no pot superar els 255 caràcters',
+                'comentari.min' => 'El comentari ha de tenir almenys 5 caràcters',
+            ]);
+
+            $comentari = User_comentari::getComentari($request->comentariId);
+
+            if ($comentari->user_id != Auth::user()->id) {
+                return response()->json(['error' => 'No pots editar aquest comentari'], 403);
+            }
+
+            if($comentari->esborrat) {
+                return response()->json(['error' => 'El comentari ha estat eliminat'], 403);
+            }
+
+            $request->comentari = strip_tags($request->comentari);
+            $request->comentari = htmlspecialchars($request->comentari);
+
+            if (strlen($request->comentari) < 5) {
+                return response()->json(['error' => 'El comentari no ha de contenir caràcters html'], 500);
+            }
+
+            $request->comentari = User::addLinks($request->comentari);
+
+            User_comentari::editarComentari($comentari, $request->comentari);
+
+            event(new EditarComentari($comentari->ruta_id, $comentari));
+
+            return response()->json(['comentariId' => $comentari->id, 'comentari' => $request->comentari], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->errors(),], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al editar el comentari'. $e], 500);
+        }
+    }
+
+    
 }

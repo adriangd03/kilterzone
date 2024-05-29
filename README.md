@@ -3,12 +3,12 @@
 - Mockup
 - Rutes
     - Vista de ruta 
-        - disseny comentari
-        - Mostar nous comentaris amb el nou disseny
-        - Respondre a comentari
+        - Event de esborrar i editar comentari
+        
         - Borrar comentaris a les teves rutes
         - compartir
         - 
+    - Sanejar text de missatges 
     - Vista en el home de rutas populares y de amigos
     - Ver tus rutas 
     - Ver las rutas de otros usuarios en su perfil

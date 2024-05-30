@@ -15,5 +15,9 @@ $(function () {
             console.log(data);
             comentaris.editarComentari(data.comentari.id, data.comentari.comentari);
         })
+        .listen('.EliminarComentari', function (data) {
+            console.log(data);
+            comentaris.eliminarComentari(data.comentari_id);
+        })
         ;
 });

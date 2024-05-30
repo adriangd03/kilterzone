@@ -1,5 +1,5 @@
 import toastAlerts from './modules/toastAlerts.js';
-import comentaris from './modules/comentaris.js';
+import comentaris from './modules/comentarisCreador.js';
 import { $comentariId, $inputComentari } from './modules/constantRuta.js';
 
 

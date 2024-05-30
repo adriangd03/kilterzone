@@ -19,10 +19,12 @@ class EliminarComentari implements ShouldBroadcast
      */
     private int $ruta_id;
     private int $comentari_id;
-    public function __construct(int $ruta_id, int $comentari_id)
+    private bool $isCreador;
+    public function __construct(int $ruta_id, int $comentari_id, bool $isCreador)
     {
         $this->ruta_id = $ruta_id;
         $this->comentari_id = $comentari_id;
+        $this->isCreador = $isCreador;
     }
 
     /**
@@ -33,7 +35,20 @@ class EliminarComentari implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new Channel('ruta.' . $this->ruta_id)
         ];
+    }
+
+    public function broadcastWith(): array
+    {
+        return [
+            'comentari_id' => $this->comentari_id,
+            'isCreador' => $this->isCreador
+        ];
+    }
+
+    public function broadcastAs()
+    {
+        return 'EliminarComentari';
     }
 }

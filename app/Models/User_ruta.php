@@ -39,6 +39,18 @@ class User_ruta extends Model
     }
 
     /**
+     * Funció per comprobar si un usuari es el creador d'una ruta
+     * @param int $id id de la ruta
+     * @param int $user_id id de l'usuari
+     * @return bool true si l'usuari es el creador de la ruta, false si no ho es
+     */
+    public static function isCreador($id, $user_id)
+    {
+        $ruta = User_ruta::find($id);
+        return $ruta->user_id == $user_id;
+    }
+
+    /**
      * Funció per esborrar una ruta per id
      */
     public static function deleteRuta($id)

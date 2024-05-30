@@ -56,6 +56,9 @@ class User_comentari extends Model
                     ];
                 }
                 $resposta->created = now()->diffForHumans($resposta->created_at, ['syntax' => Carbon::DIFF_ABSOLUTE, 'aUnit' => true], true);
+                if($resposta->editat){
+                    $resposta->edited =  now()->diffForHumans($resposta->created_at, ['syntax' => Carbon::DIFF_ABSOLUTE, 'aUnit' => true], true);
+                }
             }
         }
         return $comentaris;

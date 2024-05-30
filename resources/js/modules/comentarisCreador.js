@@ -25,7 +25,10 @@ function crearComentariRebut(user, comentari) {
                 $('<div>', { class: 'd-flex', id: `info-${comentari.id}` }).append(
                     $('<span>', { class: "small text-muted me-2" }).html('Nou')
                     , $('<button>', { class: "btn p-0 border-0 text-muted", type: "button", id: `${comentari.id}`, 'data-username': `${user.username}` }).append(
-                        $('<span>', { class: "small align-top" }).html('Respondre')).on('click', comentaris.listenerRespondre)
+                        $('<span>', { class: "small align-top" }).html('Respondre')).on('click', comentaris.listenerRespondre),
+                    $('<button>', { id:`opcions-comentari-${comentari.id}`, class: 'btn p-0 border-0 text-muted ms-2', type: 'button', 'data-bs-toggle': 'modal', 'data-bs-target': '#eliminarComentariModal', 'data-comentari-id': `${comentari.id}` }).append(
+                        $('<i>', { class: 'bi bi-three-dots' })
+                    ).on('click', comentaris.mostrarModalOpcionsComentariNoPropi)
                 ),
                 $('<div>', { id: `divRespostes-${comentari.id}`, class: 'd-flex mt-2 d-none' }).append(
                     $('<button>', { class: 'btn p-0 border-0 text-muted', id: `veure-respostes-${comentari.id}`, name: 'respostes', type: 'button', 'data-bs-toggle': 'collapse', 'data-bs-target': `#respostes-${comentari.id}`, 'aria-expanded': 'false', 'aria-controls': 'collapseExample' }).append(
@@ -171,7 +174,6 @@ let comentaris = {
     eliminarComentari: function (comentariId) {
         $(`#comentari-${comentariId}`).html('[Comentari eliminat]');
         $(`#opcions-comentari-${comentariId}`).remove();
-        // Tanquem el modal d'opcions de comentari
         $('[name="closeModal"]').trigger('click');
 
     },
@@ -204,8 +206,14 @@ let comentaris = {
         $('#editarComentariId').val(comentariId);
         $('#editarComentariInput').val(comentariText);
         $('#eliminarComentariId').val(comentariId);
-
-
+    },
+    /**
+     * Funció per mostrar el modal de opcions de comentari no propi i ficar les dades
+     */
+    mostrarModalOpcionsComentariNoPropi: function (e) {
+        let $button = $(e.target).closest('button');
+        let comentariId = $button.attr('data-comentari-id');
+        $('#eliminarComentariIdCreador').val(comentariId);
     }
 
 

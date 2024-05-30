@@ -3,11 +3,9 @@
 - Mockup
 - Rutes
     - Vista de ruta 
-        - Event de esborrar i editar comentari
-        
-        - Borrar comentaris a les teves rutes
         - compartir
-        - 
+    - quitar opcion de esborrany
+    - Mostrar colores y significado en vista de creació de ruta
     - Sanejar text de missatges 
     - Vista en el home de rutas populares y de amigos
     - Ver tus rutas 
@@ -47,6 +45,10 @@
 ## Passos per la instal·lació del projecte
 
 # Millores
-- Afegir opció per bloquejar a usuaris.
+- Afegir opció per bloquejar a usuaris. 
+- Crear rutes com esborrany per poder editar-les mé stard abans de publicar-les.
+- Afegir un admin.
+- Afegir un filtre per evitar noms amb paraules violentes, etc...
+- numero de likes y de ruta escalada a tiempo real en la vista de la ruta.
 
 

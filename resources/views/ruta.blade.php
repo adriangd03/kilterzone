@@ -2,10 +2,18 @@
 
 @section('title', 'Ruta')
 @auth
-@section('scripts')
-@vite('resources/js/ruta.js')
-@endsection
+    @if($ruta->user_id === Auth::user()->id)
+        @section('scripts')
+            @vite('resources/js/rutaCreador.js')
+        @endsection
+    @else
+        @section('scripts')
+            @vite('resources/js/ruta.js')
+        @endsection
+    @endif
+
 @endauth
+
 
 @guest
 @section('scripts')
@@ -18,7 +26,7 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-12">
-            <h1 class="fs-2">{{$ruta->nom_ruta}} {{$ruta->dificultat}}</h1>
+            <h1 class="fs-2">{{$ruta->nom_ruta}} {{$ruta->dificultat}} {{$ruta->inclinacio}}</h1>
         </div>
     </div>
     <hr class="mb-4">
@@ -61,9 +69,9 @@
                                     @endif
                                     @auth
                                     <button class="btn p-0 border-0 text-muted" id="{{$comentari->id}}" name="respondre" data-username="{{$comentari->user->username}}" type="button"><span class="small align-top">Respondre</span></button>
-                                    @if(Auth::user()->id === $comentari->user_id)
+                                    @if((Auth::user()->id === $comentari->user_id || Auth::user()->id === $ruta->user_id) && !$comentari->esborrat)
                                     <!-- Button per obrir modal -->
-                                    <button class="btn p-0 border-0 ms-2 text-muted" name="" type="button" data-bs-toggle="modal" data-bs-target="#editarComentari-{{$comentari->id}}"><i class="bi bi-three-dots"></i></button>
+                                    <button id="opcions-comentari-{{$comentari->id}}" class="btn p-0 border-0 ms-2 text-muted" name="" type="button" data-bs-toggle="modal" data-bs-target="#editarComentari-{{$comentari->id}}"><i class="bi bi-three-dots"></i></button>
                                     @endif
                                     @endauth
                                 </div>
@@ -75,7 +83,7 @@
                                 </div>
                                 <div class="collapse" id="respostes-{{$comentari->id}}">
                                     @foreach($comentari->respostes as $resposta)
-                                    <div id="comentari-{{$resposta->id}}" class="d-flex mb-4">
+                                    <div class="d-flex mb-4">
                                         <a href="{{route('perfil', $resposta->user->id)}}" class="text-reset text-decoration-none">
                                             <img src="{{$resposta->user->avatar}}" alt="avatar" class="rounded-circle me-1 border" style="width: 40px; height: 40px;" draggable="false">
                                         </a>
@@ -84,18 +92,60 @@
                                                 <a href="{{route('perfil', $resposta->user->id)}}" class="text-reset text-decoration-none">
                                                     <span class="fw-bold">{{$resposta->user->username}}</span>
                                                 </a>
-                                                <p class="m-0 ms-2 small ">{!! $resposta->comentari !!}</p>
+                                                <p id="comentari-{{$resposta->id}}" class="m-0 ms-2 small ">{!! $resposta->comentari !!}</p>
                                             </div>
                                             <div class="d-flex">
                                                 <span class="text-muted small me-2"> {{$resposta->created}}</span>
+                                                @if($resposta->editat)
+                                                <span id="editat-{{$resposta->id}}" class="text-muted small me-2">Editat fa {{$resposta->edited}}</span>
+
+                                                @endif
                                                 @auth
                                                 <button class="btn p-0 border-0 text-muted" id="{{$resposta->id}}" name="respondre" data-username="{{$resposta->user->username}}" type="button"><span class="small align-top">Respondre</span></button>
+                                                @if((Auth::user()->id === $resposta->user_id || Auth::user()->id === $ruta->user_id) && !$resposta->esborrat)
+                                                <!-- Button per obrir modal -->
+                                                <button id="opcions-comentari-{{$resposta->id}}" class="btn p-0 border-0 ms-2 text-muted" name="" type="button" data-bs-toggle="modal" data-bs-target="#editarComentari-{{$resposta->id}}"><i class="bi bi-three-dots"></i></button>
+                                                @endif
                                                 @endauth
                                             </div>
                                         </div>
                                     </div>
 
+                                    <!-- Modal per editar el teu comentari de resposta -->
+                                    @auth
+                                    @if((Auth::user()->id === $resposta->user_id || Auth::user()->id === $ruta->user_id) && !$resposta->esborrat)
+                                    <div class="modal fade" id="editarComentari-{{$resposta->id}}" tabindex="-1" aria-labelledby="modalAvatarLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header ">
+                                                    <h4 class="modal-title m-auto" id="modalAvatarLabel">Editar Comentari</h4>
 
+                                                </div>
+                                                <div class="modal-body p-0">
+                                                    @if(Auth::user()->id === $resposta->user_id)
+                                                    <button id="btnEditarComentari" type="button" class="btn rounded-0 btn-light  user-hover w-100 border border-bottom border-top pt-3 pb-3 fs-5 p-1 text-center text-primary" data-bs-toggle="collapse" data-bs-target="#editar-{{$resposta->id}}" aria-expanded="false" aria-controls="collapseExample">Editar comentari</button>
+                                                    <div id="editar-{{$resposta->id}}" class="collapse justify-content-center">
+                                                        <form method="POST" name="formEditarComentari" class="d-flex ">
+                                                            @csrf
+                                                            <input type="hidden" name="comentariId" value='{{$resposta->id}}'>
+                                                            <input type="text" name="comentari" class="form-control rounded-0" value="{{ strip_tags($resposta->comentari) }}">
+                                                            <button id="btnEditarComentari" type="submit" class="btn btn-primary rounded-0 text-center ">Editar</button>
+                                                        </form>
+                                                    </div>
+                                                    @endif
+                                                    <form method="POST" name="formEliminarComentari">
+                                                        @csrf
+                                                        <input type="hidden" name="comentariId" value="{{$resposta->id}}">
+                                                        <button id="btnEliminarAvatar" type="submit" class="btn rounded-0 btn-light  text-danger w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0">Eliminar comentari</button>
+                                                    </form>
+                                                    <button name="closeModal" type="button" class="btn rounded-top-0 btn-light  w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @endif
+                                    @endauth
 
 
                                     @endforeach
@@ -106,7 +156,7 @@
 
                     <!-- Modal per editar el teu comentari -->
                     @auth
-                    @if(Auth::user()->id === $comentari->user_id)
+                    @if((Auth::user()->id === $comentari->user_id || Auth::user()->id === $ruta->user_id) && !$comentari->esborrat)
                     <div class="modal fade" id="editarComentari-{{$comentari->id}}" tabindex="-1" aria-labelledby="modalAvatarLabel" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
@@ -115,23 +165,25 @@
 
                                 </div>
                                 <div class="modal-body p-0">
-                                    <button id="btnEditarComentari" type="button" class="btn rounded-0  user-hover w-100 border border-bottom border-top pt-3 pb-3 fs-5 p-1 text-center text-primary" data-bs-toggle="collapse" data-bs-target="#editar-{{$comentari->id}}" aria-expanded="false" aria-controls="collapseExample">Editar comentari</button>
+                                    @if(Auth::user()->id === $comentari->user_id)
+                                    <button id="btnEditarComentari" type="button" class="btn rounded-0 btn-light   user-hover w-100 border border-bottom border-top pt-3 pb-3 fs-5 p-1 text-center text-primary" data-bs-toggle="collapse" data-bs-target="#editar-{{$comentari->id}}" aria-expanded="false" aria-controls="collapseExample">Editar comentari</button>
                                     <div id="editar-{{$comentari->id}}" class="collapse justify-content-center">
                                         <form method="POST" name="formEditarComentari" class="d-flex ">
                                             @csrf
                                             <input type="hidden" name="comentariId" value="{{$comentari->id}}">
-                                            <input type="text" name="comentari" class="form-control rounded-0" value="{{$comentari->comentari}}">
+                                            <input type="text" name="comentari" class="form-control rounded-0" value="{{ strip_tags($comentari->comentari) }}">
                                             <button id="btnEditarComentari" type="submit" class="btn btn-primary rounded-0 text-center ">Editar</button>
                                         </form>
                                     </div>
+                                    @endif
 
                                     <form method="POST" name="formEliminarComentari">
                                         @csrf
                                         <input type="hidden" name="comentariId" value="{{$comentari->id}}">
-                                        <button id="btnEliminarAvatar" type="submit" class="btn rounded-0 text-danger w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0">Eliminar comentari</button>
+                                        <button id="btnEliminarAvatar" type="submit" class="btn rounded-0 btn-light  text-danger w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0">Eliminar comentari</button>
                                     </form>
 
-                                    <button type="button" class="btn rounded-top-0 w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
+                                    <button name="closeModal" type="button" class="btn rounded-top-0 btn-light  w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
 
                                 </div>
 
@@ -197,7 +249,7 @@
         </div>
     </div>
 </div>
-
+<!-- Modal per editar comentari afegits amb javascript -->
 @auth
 <div class="modal fade" id="editarComentariModal" tabindex="-1" aria-labelledby="modalAvatarLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -207,12 +259,12 @@
 
             </div>
             <div class="modal-body p-0">
-                <button id="btnEditarComentari" type="button" class="btn rounded-0  user-hover w-100 border border-bottom border-top pt-3 pb-3 fs-5 p-1 text-center text-primary" data-bs-toggle="collapse" data-bs-target="#editarComentari" aria-expanded="false" aria-controls="collapseExample">Editar comentari</button>
+                <button id="btnEditarComentari" type="button" class="btn rounded-0 btn-light   user-hover w-100 border border-bottom border-top pt-3 pb-3 fs-5 p-1 text-center text-primary" data-bs-toggle="collapse" data-bs-target="#editarComentari" aria-expanded="false" aria-controls="collapseExample">Editar comentari</button>
                 <div id="editarComentari" class="collapse justify-content-center">
                     <form method="POST" name="formEditarComentari" class="d-flex ">
                         @csrf
                         <input type="hidden" id="editarComentariId" name="comentariId" value="">
-                        <input type="text" id="editarComentariInput" name="comentari" class="form-control rounded-0" >
+                        <input type="text" id="editarComentariInput" name="comentari" class="form-control rounded-0">
                         <button id="btnEditarComentari" type="submit" class="btn btn-primary rounded-0 text-center ">Editar</button>
                     </form>
                 </div>
@@ -220,16 +272,44 @@
                 <form method="POST" name="formEliminarComentari">
                     @csrf
                     <input type="hidden" id="eliminarComentariId" name="comentariId" value="">
-                    <button id="btnEliminarAvatar" type="submit" class="btn rounded-0 text-danger w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0">Eliminar comentari</button>
+                    <button id="btnEliminarAvatar" type="submit" class="btn rounded-0 btn-light  text-danger w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0">Eliminar comentari</button>
                 </form>
 
-                <button type="button" class="btn rounded-top-0 w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
+                <button name="closeModal" type="button" class="btn rounded-top-0 btn-light  w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
 
             </div>
 
         </div>
     </div>
 </div>
+@endauth
+
+<!-- Modal per esborrar comentari com creador de la ruta -->
+@auth
+@if($ruta->user_id === Auth::user()->id)
+<div class="modal fade" id="eliminarComentariModal" tabindex="-1" aria-labelledby="modalAvatarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header ">
+                <h4 class="modal-title m-auto" id="modalAvatarLabel">Editar Comentari</h4>
+
+            </div>
+            <div class="modal-body p-0">
+              
+                <form method="POST" name="formEliminarComentari">
+                    @csrf
+                    <input type="hidden" id="eliminarComentariIdCreador" name="comentariId" value="">
+                    <button id="btnEliminarAvatar" type="submit" class="btn rounded-0 btn-light  text-danger w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0">Eliminar comentari</button>
+                </form>
+
+                <button name="closeModal" type="button" class="btn rounded-top-0 btn-light  w-100 border border-bottom user-hover pt-3 pb-3 fs-5 p-1 text-center mt-0" data-bs-dismiss="modal" aria-label="Close">Cancel·lar</button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+@endif
 @endauth
 
 

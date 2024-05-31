@@ -24,13 +24,18 @@ use Illuminate\Support\Str;
 
 class RutaController extends Controller
 {
+    /**
+     * Funció per carregar la vista de la ruta
+     * @param int $id id de la ruta
+     * @return \Illuminate\Http\Response
+     */
     public function rutaView($id)
     {
         try {
             // Comprovem que la ruta existeixi
             $ruta = User_ruta::find($id);
             if (!$ruta) {
-                return redirect()->route('home')->with('error', 'La ruta no existeix');
+                return redirect()->route('home')->with('error', 'La ruta no existeix ss');
             }
 
             // Agafem les dades de l'usuari
@@ -65,6 +70,47 @@ class RutaController extends Controller
             return view('ruta', compact('ruta', 'friends', 'friendRequests', 'notFriends', 'totalUnreadMessages', 'totalFriendRequests', 'user', 'liked', 'comentaris', 'escalat'));
         } catch (\Exception $e) {
             return redirect()->route('home')->with('error', 'Error al carregar la pàgina de la ruta' . $e);
+        }
+    }
+
+
+    /**
+     * Funció per mostrar les rutes que el usuari ha escalat i ha donat like
+     * @return \Illuminate\Http\Response
+     */
+    public function rutesEscaladesLike()
+    {
+
+        try {
+            // Agafem les rutes que l'usuari ha escalat
+            $rutesEscalades = User_ruta::getEscalades(Auth::user()->id);
+
+            // Agafem les rutes que l'usuari ha donat like
+            $rutesLiked = User_ruta::getLikedRutes(Auth::user()->id);
+
+
+            // Agafem les dades del chat
+            $chatData = User::getChatData();
+            $friends = $chatData['friends'];
+            $friendRequests = $chatData['friendRequests'];
+            $notFriends = $chatData['notFriends'];
+            $totalUnreadMessages = $chatData['totalUnreadMessages'];
+            $totalFriendRequests = $chatData['totalFriendRequests'];
+
+            // Comprovem que no hi hagi rutes repetides 
+            $rutesEscalades = $rutesEscalades->filter(function ($value, $key) use ($rutesLiked) {
+                return !$rutesLiked->contains('id', $value->id);
+            });
+
+
+            $rutes = $rutesEscalades->merge($rutesLiked);
+
+            $rutes = $rutes->sortByDesc('created_at');
+
+            return view('user_rutas', compact('rutes', 'friends', 'friendRequests', 'notFriends', 'totalUnreadMessages', 'totalFriendRequests'));
+            
+        } catch (\Exception $e) {
+            return redirect()->route('home')->with('error', 'Error al carregar les rutes escalades i liked');
         }
     }
 
@@ -108,7 +154,7 @@ class RutaController extends Controller
                 'dificultat' => 'required|in:4a,4b,4c,5a,5b,5c,6a,6a+,6b,6b+,6c,6c+,7a,7a+,7b,7b+,7c,7c+,8a,8a+,8b,8b+,8c,8c+',
                 'peces' => 'required',
                 'layout' => 'required|in:homeWall,original',
-                'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,10x10MainlineLedKitHomeWall,10x10AuxliaryLedKitHomeWall,8x12FullRideLedKitHomeWall,8x12MainlineLedKitHomeWall,8x12AuxiliaryLedKitHomeWall,10x12FullRideLedKitHomeWall,10x12MainlineLedKitHomeWall,10x12AuxiliaryLedKitHomeWall,16x12BoltOnsScrewOns,16x12BoltOns,16x12ScrewOns,12x14BoltOnsScrewOns,12x14BoltOns,12x14ScrewOns,12x12BoltOnsScrewOns,12x12BoltOns,12x12ScrewOns,8x12BoltOnsScrewOns,8x12BoltOns,8x12ScrewOns,7x10BoltOnsScrewOns,7x10BoltOns,7x10ScrewOns',
+                'size' => 'required|in:7x10FullRideLedKitHomeWall,7x10MainlineLedKitHomeWall,7x10AuxiliaryLedKitHomeWall,10x10FullRideLedKitHomeWall,10x10MainlineLedKitHomeWall,10x10AuxiliaryLedKitHomeWall,8x12FullRideLedKitHomeWall,8x12MainlineLedKitHomeWall,8x12AuxiliaryLedKitHomeWall,10x12FullRideLedKitHomeWall,10x12MainlineLedKitHomeWall,10x12AuxiliaryLedKitHomeWall,16x12BoltOnsScrewOns,16x12BoltOns,16x12ScrewOns,12x14BoltOnsScrewOns,12x14BoltOns,12x14ScrewOns,12x12BoltOnsScrewOns,12x12BoltOns,12x12ScrewOns,8x12BoltOnsScrewOns,8x12BoltOns,8x12ScrewOns,7x10BoltOnsScrewOns,7x10BoltOns,7x10ScrewOns',
 
             ], [
                 'nom.required' => 'El nom de la ruta és obligatori',
@@ -130,11 +176,16 @@ class RutaController extends Controller
             ]);
 
             if ($request->layout === 'homeWall') {
-
+                $request->layout = 'Home Wall';
                 $wall = HomeWallController::getSvg($request->size);
+                
+                $request->size = $wall['size'];
+                $wall = $wall['wall'];
             } else {
-
+                $request->layout = 'Original';
                 $wall = OriginalController::getSvg($request->size);
+                $request->size = $wall['size'];
+                $wall = $wall['wall'];
             }
 
 
@@ -170,18 +221,18 @@ class RutaController extends Controller
 
                 if ($peca->tipus == 'start') {
                     $start++;
-                    // Afegim el stroke y el stroke-width de la peça de start
-                    $wall = substr_replace($wall, 'stroke:yellow; stroke-width:5px;', $positionStyle, 0);
+                    // Afegim el fill y el fill-width de la peça de start
+                    $wall = substr_replace($wall, 'fill:#ebe75b; ', $positionStyle, 0);
                 } else if ($peca->tipus == 'end') {
                     $end++;
-                    // Afegim el stroke y el stroke-width de la peça de end
-                    $wall = substr_replace($wall, 'stroke:red; stroke-width:5px;', $positionStyle, 0);
+                    // Afegim el fill y el fill-width de la peça de end
+                    $wall = substr_replace($wall, 'fill:#ed3300; ', $positionStyle, 0);
                 } else if ($peca->tipus == 'foot') {
-                    // Afegim el stroke y el stroke-width de la peça de foot
-                    $wall = substr_replace($wall, 'stroke:orange; stroke-width:5px;', $positionStyle, 0);
+                    // Afegim el fill y el fill-width de la peça de foot
+                    $wall = substr_replace($wall, 'fill:darkorange; ', $positionStyle, 0);
                 } else {
-                    // Afegim el stroke y el stroke-width de la peça de normal
-                    $wall = substr_replace($wall, 'stroke:blue; stroke-width:5px;', $positionStyle, 0);
+                    // Afegim el fill y el fill-width de la peça de normal
+                    $wall = substr_replace($wall, 'fill:#04a8c4; ', $positionStyle, 0);
                 }
             }
 
@@ -198,16 +249,13 @@ class RutaController extends Controller
             $ruta->dificultat = $request->dificultat;
             $ruta->inclinacio = $request->inclinacio;
             $ruta->layout = $request->layout . ' ' . $request->size;
-            if ($request->esborrany) {
-                $ruta->esborrany = 1;
-            }
             $ruta->save();
 
             return response()->json(['route' => route('ruta', ['id' => $ruta->id])], 200);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->errors(),], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al crear la ruta'], 500);
+            return response()->json(['error' => 'Error al crear la ruta' . $e], 500);
         }
     }
 
@@ -424,8 +472,8 @@ class RutaController extends Controller
                 return response()->json(['error' => 'El comentari ha estat eliminat'], 403);
             }
 
-            $request->comentari = strip_tags($request->comentari);
             $request->comentari = htmlspecialchars($request->comentari);
+            $request->comentari = strip_tags($request->comentari);
 
             if (strlen($request->comentari) < 5) {
                 return response()->json(['error' => 'El comentari no ha de contenir caràcters html'], 500);
@@ -455,6 +503,38 @@ class RutaController extends Controller
             return response()->json(['error' => $e->errors(),], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al editar el comentari' . $e], 500);
+        }
+    }
+
+    /**
+     * Funció per esborrar una ruta
+     * @param Request $request
+     * 
+     */
+    public function eliminarRuta(Request $request)
+    {
+        try {
+            $request->validate([
+                'rutaId' => 'required|exists:user_ruta,id',
+            ], [
+                'rutaId.required' => 'La id de la ruta és obligatòria',
+                'rutaId.exists' => 'La ruta no existeix',
+            ]);
+
+            $ruta = User_ruta::find($request->rutaId);
+
+
+            if ($ruta->user_id != Auth::user()->id) {
+                return response()->json(['error' => 'No pots eliminar aquesta ruta'], 403);
+            }
+
+            User_ruta::deleteRuta($ruta->id);
+
+            return redirect()->route('home')->with('success', 'Ruta esborrada correctament');
+        } catch (ValidationException $e) {
+            return redirect()->back()->with('error', 'Error al esborrar la ruta');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al esborrar la ruta' );
         }
     }
 }

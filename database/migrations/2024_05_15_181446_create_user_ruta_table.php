@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('layout');
             $table->integer('likes')->default(0);
             $table->integer('escalada')->default(0);
-            $table->boolean('esborrany')->default(0);
             $table->timestamps();
         });
     }

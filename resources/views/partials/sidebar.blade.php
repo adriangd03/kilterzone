@@ -49,6 +49,12 @@
                     <span class="fs-6 ms-1 d-none d-lg-inline">Crear ruta</span>
                 </a>
             </li>
+            <li class="nav-item py-2 py-sm-0 user-hover">
+                <a class="nav-link  text-light" href="{{ route('ruta.escaladesLiked') }}">
+                    <i class="bi bi-bookmark-heart fs-4"></i>
+                    <span class="fs-6 ms-1 d-none d-lg-inline">Rutes guardades</span>
+                </a>
+            </li>
             
             @endauth
             @guest

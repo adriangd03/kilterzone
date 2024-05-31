@@ -69,6 +69,44 @@
             <div class="card border-0">
                 <div class="card-body">
                     <h5 class="card-title">Publicacions</h5>
+                    <div class="row">
+                        @foreach($rutes as $ruta)
+                        <div class="col-md-3 col-sm-4 col-6">
+                            <div class="card border-0 h-100">
+                                <div class="card-img-top row">
+                                    <a href="{{ route('ruta', $ruta->id) }}">
+                                        {!! $ruta->ruta !!}
+                                    </a>
+                                </div>
+                                <div class="card-body ps-0 row d-flex flex-column mb-0 align-items-bottom">
+                                    <div class="d-flex mt-auto ms-0  align-items-center">
+                                        <a href="{{ route('perfil', ['id' => $ruta->creador->id]) }}">
+                                            <img class="rounded-circle border" src="{{ $ruta->creador->avatar }}" alt="avatar 1" style="width: 45px; height: 45px;">
+                                        </a>
+                                        <div class="card-text align-baseline align-items-baseline ms-2">
+                                            <a class="text-reset text-decoration-none" href="{{ route('perfil', ['id' => $ruta->creador->id]) }}">
+
+                                                <span class="fw-bold text-dark">{{ $ruta->creador->username }}</span>
+                                            </a>
+
+                                        </div>
+
+
+                                    </div>
+                                <span class="card-title fs-5 fw-bold ">{{ $ruta->nom_ruta }} {{ $ruta->dificultat }} {{ $ruta->inclinacio }} </span>
+                                <span class="card-title fw-bold ">{{ $ruta->layout }}</span>
+                                <p class="card-text">{{ $ruta->descripcio }}</p>
+                                <div class="d-flex mb-2">
+                                    <div class="text-muted"><i class="bi bi-heart"></i> Likes: {{ $ruta->likes }}</div>
+                                    <div class="text-muted"><img src="{{asset('img/climb.svg')}}" class="opacity-50" alt="escalada" style="width: 23px; height: 23px;">Escalat: {{ $ruta->escalada }}</div>
+                                </div>
+                                <span class="">Creat fa {{ $ruta->created }}</span>
+                                <a href="{{ route('ruta', $ruta->id) }}" class="btn btn-primary ">Veure ruta</a>
+                            </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 

@@ -187,12 +187,14 @@ class User extends Authenticatable implements CanResetPassword
             $username = substr($text, $pos + 1, $pos2 - $pos - 1);
             $user = User::getUserByUsername($username);
             if ($user) {
-                $text = substr($text, 0, $pos) . '<a href="/profile/' . $user->id . '"> @' . $username . '</a>' . substr($text, $pos2);
+                $text = substr($text, 0, $pos) . '<a href="' . route('perfil', ['id' => $user->id]) . '"> @' . $username . '</a>' . substr($text, $pos2);
             }
             $pos = strpos($text, '@', $pos2);
         }
         return $text;
     }
+
+
 
     
 }

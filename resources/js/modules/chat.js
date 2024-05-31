@@ -188,12 +188,12 @@ var missatges = {
             .then((response) => {
                 console.log(response);
                 // Mostrar el missatge enviat
-                missatges.mostrarMissatgeEnviat(formData.get("message"));
+                missatges.mostrarMissatgeEnviat(response.data.message);
                 form.reset();
                 // Afegir el missatge a la variable messages
                 if (missatges.messages[formData.get("receiver")]) {
                     missatges.messages[formData.get("receiver")].messages.push({
-                        message: formData.get("message"),
+                        message: response.data.message,
                         user_id: userId,
                         receiver_id: formData.get("receiver"),
                         created_at: new Date(),

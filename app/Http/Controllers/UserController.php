@@ -11,7 +11,6 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Password;
 use App\Models\User_message;
-use Illuminate\Database\Eloquent\Builder;
 use App\Events\SendFriendRequest;
 use App\Events\ChatMessage;
 use App\Events\AcceptFriendRequest;
@@ -19,6 +18,7 @@ use App\Events\RemoveFriend;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User_ruta;
+use Carbon\Carbon;
 
 
 
@@ -37,13 +37,20 @@ class UserController extends Controller
     public function home()
     {
         try {
+            // Agafem les rutes populars
+            $rutesPopulars = User_ruta::getRutesPopulars();
+
             // Comprovem si l'usuari està autenticat i si no ho està retornem la vista de la pàgina principal
             if (!Auth::check()) {
+                $usuarisRecomenats = User_friend::recommendPopularUsers();
                 $notFriends = User::getAll();
-                return view('home', compact('notFriends'));
+                return view('home', compact('notFriends', 'rutesPopulars', 'usuarisRecomenats'));
             }
+            // Agafem les últimes rutes que han creat els usuaris amics de l'usuari autenticat
+            $rutes = User_ruta::getFriendsLatestRutes(Auth::user()->id);
 
 
+            // Agafem les dades per el chat i les amistats
             $chatData = User::getChatData();
             $friends = $chatData['friends'];
             $friendRequests = $chatData['friendRequests'];
@@ -51,14 +58,15 @@ class UserController extends Controller
             $totalUnreadMessages = $chatData['totalUnreadMessages'];
             $totalFriendRequests = $chatData['totalFriendRequests'];
 
-            $rutes = User_ruta::all();
+            // Agafem els usuaris recomanats
+            $recomendacioFriends = User_friend::recommendFriends(Auth::user()->id);
 
             // Retornem la vista de la pàgina principal
-            return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests', 'rutes'));
+            return view('home', compact('friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests', 'rutes', 'rutesPopulars', 'recomendacioFriends'));
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar la pàgina principal retornem un error
-            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard');
-            return view('home', compact('friends',  'notFriends', 'friendRequests', 'totalFriendRequests', 'totalUnreadMessages',));
+            session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar la pàgina principal, tornar a provar o prova-ho més tard' . $e);
+            return view('home', compact('friends',  'notFriends', 'friendRequests', 'totalFriendRequests', 'totalUnreadMessages', 'rutes', 'rutesPopulars'));
         }
     }
 
@@ -73,21 +81,33 @@ class UserController extends Controller
     {
         try {
 
-            if (!Auth::check()) {
-                $notFriends = User::getAll();
-                $user = User::getUserById($id);
-                $user->friends = User_friend::getFriends($user->id)->count();
-                return view('perfil', compact('notFriends', 'user'));
-            }
-
             // Agafem l'usuari per id
             $user = User::getUserById($id);
 
+            
+            
             // Comprovem si l'usuari existeix
             if (!$user) {
                 // Si l'usuari no existeix retornem un error
                 session()->flash('error', 'Aquest usuari no existeix');
                 return redirect()->route('home');
+            }
+            // Agafem les rutes de l'usuari
+            $rutes = User_ruta::getRutes($user->id);
+
+            $rutes = $rutes->map(function ($ruta) use ($user){
+                $ruta->creador = $user;
+                Carbon::setLocale('ca');
+                $ruta->created = now()->diffForHumans($ruta->created_at, ['syntax' => Carbon::DIFF_ABSOLUTE, 'aUnit' => true]);
+                return $ruta;
+            });
+
+            // Comprovem si l'usuari està autenticat i si no ho està retornem la vista del perfil de l'usuari
+            if (!Auth::check()) {
+                $notFriends = User::getAll();
+           
+                $user->friends = User_friend::getFriends($user->id)->count();
+                return view('perfil', compact('notFriends', 'user', 'rutes'));
             }
 
             if ($user->id == Auth::user()->id) {
@@ -112,7 +132,7 @@ class UserController extends Controller
             $user->sentFriendRequest = User_friend::hasSentFriendRequest(Auth::user()->id, $id);
 
             // Retornem la vista del perfil de l'usuari
-            return view('perfil', compact('user', 'friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests', 'isFriend'));
+            return view('perfil', compact('user', 'friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests', 'isFriend', 'rutes'));
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar el perfil de l'usuari retornem un error
             session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar el perfil de l\'usuari, tornar a provar o prova-ho més tard');
@@ -141,8 +161,18 @@ class UserController extends Controller
             // Agafar el nombre d'amics de l'usuari
             $user->friends = User_friend::getFriends($user->id)->count();
 
+            // Agafem les rutes de l'usuari
+            $rutes = User_ruta::getRutes($user->id);
+
+            $rutes = $rutes->map(function ($ruta) use ($user){
+                $ruta->creador = $user;
+                Carbon::setLocale('ca');
+                $ruta->created = now()->diffForHumans($ruta->created_at, ['syntax' => Carbon::DIFF_ABSOLUTE, 'aUnit' => true]);
+                return $ruta;
+            });
+
             // Retornem la vista del perfil propi
-            return view('perfil_user', compact('user', 'friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests'));
+            return view('perfil_user', compact('user', 'friends', 'totalUnreadMessages', 'notFriends', 'friendRequests', 'totalFriendRequests', 'rutes'));
         } catch (\Exception $e) {
             // Si hi ha algun error en el procés de mostrar el perfil propi retornem un error
             session()->flash('error', 'Hi ha ocurregut un problema en el procés de mostrar el perfil propi, tornar a provar o prova-ho més tard');
@@ -719,6 +749,19 @@ class UserController extends Controller
                 return response()->json(['error' => 'No pots enviar missatges a aquest usuari, perquè no sou amics'], 403);
             }
 
+            // Netegem el missatge de caràcters especials
+            $request->message = htmlspecialchars($request->message);
+            $request->message = strip_tags($request->message);
+
+            // Comprovem si el missatge ha quedat buit després de netejar-lo
+            if (empty($request->message)) {
+                return response()->json(['error' => 'El missatge no pot estar buit'], 422);
+            }
+
+
+            // Afegim els links al missatge
+            $request->message = User::addLinks($request->message);
+
             // Enviem el missatge
             event(new ChatMessage($request->message, auth::user(), $receiver));
 
@@ -730,7 +773,7 @@ class UserController extends Controller
             $message->save();
 
             // Retornem un missatge de confirmació
-            return response()->json(['message' => 'Missatge enviat correctament']);
+            return response()->json(['message' => $message->message], 200);
         } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->getMessageBag()], 422);
         } catch (\Exception $e) {
@@ -932,11 +975,11 @@ class UserController extends Controller
 
             // Retornem un missatge de confirmació
             return redirect()->back()->with('success', 'Dades actualitzades correctament');
-
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->validator->getMessageBag(), 'actualitzarDades')->withInput();
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'actualitzar les dades, tornar a provar o prova-ho més tard');}
+            return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'actualitzar les dades, tornar a provar o prova-ho més tard');
+        }
     }
 
 
@@ -992,6 +1035,4 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Hi ha ocurregut un problema en el procés d\'actualitzar la contrasenya, tornar a provar o prova-ho més tard');
         }
     }
-
-
 }

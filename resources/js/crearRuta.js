@@ -154,31 +154,28 @@ function seleccionarPeca(e) {
         if (peca.tipus !== 'end') {
             if (peca.tipus === 'foot') {
                 if (end < 2) {
-                    $(this).css('stroke', 'red');
-                    $(this).css('stroke-width', '2');
+                    $(this).css('fill', '#ed3300');
                     peca.tipus = 'end';
                     end = end + 1;
                 } else {
-                    $(this).css('stroke', 'black');
-                    $(this).css('stroke-width', '1');
+                    $(this).css('fill', '');
                     peces = peces.filter(e => e.id !== id);
                     end = end - 1;
                 }
             }
             if (peca.tipus === 'middle') {
-                $(this).css('stroke', 'orange');
-                $(this).css('stroke-width', '2');
+                $(this).css('fill', 'darkorange');
+
                 peca.tipus = 'foot';
             }
             if (peca.tipus === 'start') {
-                $(this).css('stroke', 'blue');
-                $(this).css('stroke-width', '2');
+                $(this).css('fill', '#04a8c4');
+
                 peca.tipus = 'middle';
                 start = start - 1;
             }
         } else {
-            $(this).css('stroke', 'black');
-            $(this).css('stroke-width', '1');
+            $(this).css('fill', '');
             peces = peces.filter(e => e.id !== id);
             end = end - 1;
             return;
@@ -187,14 +184,15 @@ function seleccionarPeca(e) {
         // Comprovem que no hi hagi 2 peces de tipus start
         if (start < 2) {
             // Change the border color of the path to red
-            $(this).css('stroke', 'yellow');
-            $(this).css('stroke-width', '2');
+            $(this).css('fill', '#ebe75b');
+
+
             // We add the id to the array
             peces.push({ id: id, tipus: 'start' });
             start = start + 1;
         } else {
-            $(this).css('stroke', 'blue');
-            $(this).css('stroke-width', '2');
+            $(this).css('fill', '#04a8c4');
+
             peces.push({ id: id, tipus: 'middle' });
         }
     }
@@ -222,7 +220,7 @@ $(function () {
         // Mostrem la mida de la paret seleccionada
         $(`[name="${wall}"]`).removeClass('d-none');
 
-    
+
     } else if (layout === 'original') {
         // Comprovem que les options estiguin afegides
         $('#size').empty();
@@ -230,7 +228,7 @@ $(function () {
         wall = '7x10BoltOnsScrewOns';
         // Mostrem la mida de la paret seleccionada
         $(`[name="${wall}"]`).removeClass('d-none');
-    
+
 
     } else {
         $('svg').addClass('d-none');
@@ -243,10 +241,8 @@ $(function () {
         wall = $(this).val();
         $(`[name="${wall}"]`).removeClass('d-none');
         // Unselect all the paths
-        $('path').css('stroke', 'black');
-        $('circle').css('stroke', 'black');
-        $('path').css('stroke-width', '1');
-        $('circle').css('stroke-width', '1');
+        $('path').css('fill', '');
+        $('circle').css('fill', '');
         start = 0;
         end = 0;
         peces = [];
@@ -269,10 +265,9 @@ $(function () {
 
         $(`[name="${wall}"]`).removeClass('d-none');
         // Unselect all the paths
-        $('path').css('stroke', 'black');
-        $('circle').css('stroke', 'black');
-        $('path').css('stroke-width', '1');
-        $('circle').css('stroke-width', '1');
+        $('path').css('fill', '');
+        $('circle').css('fill', '');
+        $('ellipse').css('fill', '');
         start = 0;
         end = 0;
         peces = [];
@@ -283,6 +278,7 @@ $(function () {
     //We add a listener to all the paths of the svg
     $('path').on('click', seleccionarPeca);
     $('circle').on('click', seleccionarPeca);
+    $('ellipse').on('click', seleccionarPeca);
 
     $('#formCrearRuta').on('submit', function (e) {
         e.preventDefault();
@@ -290,7 +286,7 @@ $(function () {
         formData.append('peces', JSON.stringify(peces));
         axios.post('/crearRuta', formData)
             .then(function (response) {
-                
+
                 window.location.href = response.data.route;
             })
             .catch(function (error) {

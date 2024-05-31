@@ -146,7 +146,9 @@ class User_friend extends Model
     }
 
     /**
-     * Funció que 
+     * Funció per esborrar una amistat entre dos usuaris
+     * @param int $user_id Id de l'usuari
+     * @param int $friend_id Id de l'amic
      */
     public static function deleteFriendship($user_id, $friend_id)
     {
@@ -161,6 +163,37 @@ class User_friend extends Model
         User_message::deleteMessagesBetweenUsers($user_id, $friend_id);
     }
 
-    
+    /**
+     * Funció per recomenar amics a un usuari
+     * @param int $user_id Id de l'usuari
+     * @return User Usuaris recomanats
+     */
+    public static function recommendFriends($user_id)
+    {
+
+        $not_friends = User_friend::getNotFriends($user_id);
+
+        $not_friends = $not_friends->filter(function ($user) use ($user_id) {
+            return !User_friend::hasSentFriendRequest($user_id, $user->id);
+        });
+
+        return $not_friends->take(10);
+    }    
+
+    /**
+     * Funció per recomenar usuaris populars a un guest
+     * @return User Usuaris recomanats
+     */
+    public static function recommendPopularUsers()
+    {
+        $users = User::all();
+
+        $users = $users->filter(function ($user) {
+            $user->rutes = User_ruta::getRutes($user->id);
+            return $user->rutes->count() > 0;
+        });
+
+        return $users->take(10);
+    }
 
 }

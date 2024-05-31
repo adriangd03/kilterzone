@@ -69,8 +69,6 @@ Route::post('actualitzarContrasenya', [UserController::class, 'actualitzarContra
 
 Route::get('rutes', [UserController::class, 'rutes'])->name('rutes');
 
-Route::get('rutes/{id}', [UserController::class, 'ruta'])->name('ruta');
-
 Route::get('crearRuta', [RutaController::class, 'crearRutaView'])->name('crearRuta')->middleware('auth');
 
 Route::post('crearRuta', [RutaController::class, 'crearRuta'])->name('crearRuta')->middleware('auth');
@@ -86,4 +84,8 @@ Route::post('ruta/comentari', [RutaController::class, 'comentar'])->name('ruta.c
 Route::post('ruta/comentari/eliminar', [RutaController::class, 'eliminarComentari'])->name('ruta.comentari.eliminar')->middleware('auth');
 
 Route::post('ruta/comentari/editar', [RutaController::class, 'editarComentari'])->name('ruta.comentari.editar')->middleware('auth');
+
+Route::get('rutes/escalades&&liked', [RutaController::class, 'rutesEscaladesLike'])->name('ruta.escaladesLiked')->middleware('auth');
+
+Route::post('ruta/eliminar', [RutaController::class, 'eliminarRuta'])->name('ruta.eliminar')->middleware('auth');
 

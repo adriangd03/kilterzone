@@ -56,7 +56,7 @@
                                 <div class="col">
                                     <ul class="list-inline list-group-flush ">
                                         <li id="" class="list-inline-item ps-0">Amics:<span id="totalAmics{{$user->id}}">{{$user->friends}}</span></li>
-                                        <li class="list-inline-item ps-0">Publicacions: 0</li>
+                                        <li class="list-inline-item ps-0">Publicacions: {{ $rutes->count() }}</li>
                                     </ul>
                                     <p class="card-text">@if($user->description){{$user->description}}@else Aquest usuari encara no ha afegit la seva descripció, però puc dir que és una persona molt interessant. @endif</p>
                                 </div>

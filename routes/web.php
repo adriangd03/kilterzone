@@ -21,13 +21,13 @@ Route::get('login',[UserController::class, 'loginView'])->name('login')->middlew
 
 Route::get('registre',[UserController::class, 'registreView'])->name('registre')->middleware('guest');
 
-Route::post('login', [UserController::class, 'login'])->name('login')->middleware('guest');
+Route::post('login', [UserController::class, 'login'])->name('login.post')->middleware('guest');
 
 Route::get('login-google', [UserController::class, 'loginGoogle'])->name('login-google')->middleware('guest');;
 
 Route::get('/google-callback', [UserController::class, 'googleCallback'])->name('google-callback')->middleware('guest');;
 
-Route::post('registre', [UserController::class, 'registre'])->name('registre')->middleware('guest');
+Route::post('registre', [UserController::class, 'registre'])->name('registre.post')->middleware('guest');
 
 Route::post('logout', [UserController::class, 'logout'])->name('logout')->middleware('auth');
 
@@ -71,7 +71,7 @@ Route::get('rutes', [UserController::class, 'rutes'])->name('rutes');
 
 Route::get('crearRuta', [RutaController::class, 'crearRutaView'])->name('crearRuta')->middleware('auth');
 
-Route::post('crearRuta', [RutaController::class, 'crearRuta'])->name('crearRuta')->middleware('auth');
+Route::post('crearRuta', [RutaController::class, 'crearRuta'])->name('crearRuta.post')->middleware('auth');
 
 Route::get('ruta/{id}', [RutaController::class, 'rutaView'])->name('ruta');
 

@@ -13,7 +13,7 @@
 
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route('registre') }}">
+                    <form method="POST" action="{{ route('registre.post') }}">
                         @csrf
 
                         <div class="mb-3">

@@ -19,7 +19,7 @@
                 <div class="alert alert-danger mt-2">{{ $message }}</div>
                 @enderror
                 <div class="card-body">
-                    <form method="POST" action="{{ route('login') }}">
+                    <form method="POST" action="{{ route('login.post') }}">
                         @csrf
 
                         <div class="mb-3">

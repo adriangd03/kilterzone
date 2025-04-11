@@ -46,7 +46,7 @@ class User_message extends Model
      */
     public static function getConversation($user_id, $receiver_id)
     {
-        return User_message::where('user_id', $user_id)->where('receiver_id', $receiver_id)->orWhere('user_id', $receiver_id)->where('receiver_id', $user_id)->get();
+        return User_message::where('user_id', $user_id)->where('receiver_id', $receiver_id)->orWhere('user_id', $receiver_id)->where('receiver_id', $user_id)->orderBy('created_at', 'asc')->get();
     }
 
     /**
